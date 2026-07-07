@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Name | Data Scientist</title>
+  <meta name="description" content="Portfolio of Your Name — Data Scientist" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- 3D animated background (Three.js) -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ===================== NAVBAR ===================== -->
+  <nav class="navbar">
+    <a href="#hero" class="nav-logo">&lt;YN /&gt;</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#techstack">Tech Stack</a></li>
+      <li><a href="#contact" class="nav-cta">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="Toggle menu">☰</button>
+  </nav>
+
+  <!-- ===================== HERO ===================== -->
+  <header id="hero" class="hero">
+    <p class="hero-greeting mono">Hi, my name is</p>
+    <h1 class="hero-name">Your Name<span class="accent">.</span></h1>
+    <h2 class="hero-role">I'm a <span id="typed-role" class="accent"></span><span class="cursor">|</span></h2>
+    <p class="hero-tagline">
+      <!-- PLACEHOLDER: one-line pitch about yourself -->
+      I turn messy data into models, insights, and decisions.
+    </p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn btn-primary">View My Work</a>
+      <a href="assets/resume.pdf" class="btn btn-ghost">Download Résumé</a>
+    </div>
+    <div class="scroll-hint">
+      <span class="mouse"></span>
+      <span class="mono">scroll</span>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ===================== ABOUT ===================== -->
+    <section id="about" class="section reveal">
+      <h2 class="section-title"><span class="mono accent">01.</span> About Me</h2>
+      <div class="about-grid">
+        <div class="about-text glass">
+          <!-- PLACEHOLDER: replace with your own bio -->
+          <p>
+            Hello! I'm a Data Scientist passionate about extracting signal from noise.
+            Write 2–3 sentences here about who you are, what you specialize in
+            (e.g. machine learning, forecasting, NLP), and what excites you about data.
+          </p>
+          <p>
+            Add a second paragraph about your background — education, years of
+            experience, industries you've worked in, or a fun fact.
+          </p>
+          <ul class="about-stats">
+            <li><span class="stat-num accent">X+</span><span class="stat-label">Years Experience</span></li>
+            <li><span class="stat-num accent">XX</span><span class="stat-label">Projects Delivered</span></li>
+            <li><span class="stat-num accent">X</span><span class="stat-label">Publications</span></li>
+          </ul>
+        </div>
+        <div class="about-photo glass">
+          <!-- PLACEHOLDER: put your photo at assets/profile.jpg -->
+          <div class="photo-placeholder">
+            <span class="mono">your photo<br/>assets/profile.jpg</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SKILLS ===================== -->
+    <section id="skills" class="section reveal">
+      <h2 class="section-title"><span class="mono accent">02.</span> Skills</h2>
+      <div class="cards-grid">
+        <div class="card glass tilt">
+          <div class="card-icon">🤖</div>
+          <h3>Machine Learning</h3>
+          <p>PLACEHOLDER — e.g. supervised &amp; unsupervised learning, model selection, hyper-parameter tuning, ensembling.</p>
+        </div>
+        <div class="card glass tilt">
+          <div class="card-icon">🧠</div>
+          <h3>Deep Learning</h3>
+          <p>PLACEHOLDER — e.g. CNNs, RNNs/Transformers, transfer learning, fine-tuning LLMs.</p>
+        </div>
+        <div class="card glass tilt">
+          <div class="card-icon">💬</div>
+          <h3>NLP</h3>
+          <p>PLACEHOLDER — e.g. text classification, embeddings, RAG pipelines, sentiment analysis.</p>
+        </div>
+        <div class="card glass tilt">
+          <div class="card-icon">📊</div>
+          <h3>Data Visualization</h3>
+          <p>PLACEHOLDER — e.g. dashboards, storytelling with data, Plotly / Power BI / Tableau.</p>
+        </div>
+        <div class="card glass tilt">
+          <div class="card-icon">📐</div>
+          <h3>Statistics &amp; A/B Testing</h3>
+          <p>PLACEHOLDER — e.g. hypothesis testing, causal inference, experiment design, Bayesian methods.</p>
+        </div>
+        <div class="card glass tilt">
+          <div class="card-icon">⚙️</div>
+          <h3>MLOps &amp; Engineering</h3>
+          <p>PLACEHOLDER — e.g. model deployment, CI/CD, Docker, monitoring, data pipelines.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== EXPERIENCE ===================== -->
+    <section id="experience" class="section reveal">
+      <h2 class="section-title"><span class="mono accent">03.</span> Experience</h2>
+      <div class="timeline">
+        <div class="timeline-item glass">
+          <span class="timeline-date mono accent">2024 — Present</span>
+          <h3>Job Title <span class="at">@ Company Name</span></h3>
+          <ul>
+            <li>PLACEHOLDER — key achievement with a metric (e.g. "improved forecast accuracy by 25%").</li>
+            <li>PLACEHOLDER — a second responsibility or impact statement.</li>
+            <li>PLACEHOLDER — tools/techniques used in this role.</li>
+          </ul>
+        </div>
+        <div class="timeline-item glass">
+          <span class="timeline-date mono accent">2022 — 2024</span>
+          <h3>Previous Job Title <span class="at">@ Previous Company</span></h3>
+          <ul>
+            <li>PLACEHOLDER — key achievement with a metric.</li>
+            <li>PLACEHOLDER — a second responsibility or impact statement.</li>
+          </ul>
+        </div>
+        <div class="timeline-item glass">
+          <span class="timeline-date mono accent">2018 — 2022</span>
+          <h3>Degree Name <span class="at">@ University Name</span></h3>
+          <ul>
+            <li>PLACEHOLDER — e.g. B.Tech / M.Sc in ______, relevant coursework, thesis topic.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PROJECTS ===================== -->
+    <section id="projects" class="section reveal">
+      <h2 class="section-title"><span class="mono accent">04.</span> Projects</h2>
+      <div class="cards-grid">
+        <article class="card glass tilt project-card">
+          <div class="project-top">
+            <span class="folder-icon">📁</span>
+            <span class="project-links mono"><a href="#">GitHub</a> · <a href="#">Demo</a></span>
+          </div>
+          <h3>Project Title One</h3>
+          <p>PLACEHOLDER — 2–3 sentences: the problem, your approach, and the result/impact.</p>
+          <p class="project-tags mono">Python · scikit-learn · XGBoost</p>
+        </article>
+        <article class="card glass tilt project-card">
+          <div class="project-top">
+            <span class="folder-icon">📁</span>
+            <span class="project-links mono"><a href="#">GitHub</a> · <a href="#">Demo</a></span>
+          </div>
+          <h3>Project Title Two</h3>
+          <p>PLACEHOLDER — 2–3 sentences: the problem, your approach, and the result/impact.</p>
+          <p class="project-tags mono">PyTorch · Transformers · FastAPI</p>
+        </article>
+        <article class="card glass tilt project-card">
+          <div class="project-top">
+            <span class="folder-icon">📁</span>
+            <span class="project-links mono"><a href="#">GitHub</a> · <a href="#">Demo</a></span>
+          </div>
+          <h3>Project Title Three</h3>
+          <p>PLACEHOLDER — 2–3 sentences: the problem, your approach, and the result/impact.</p>
+          <p class="project-tags mono">SQL · Airflow · Power BI</p>
+        </article>
+        <article class="card glass tilt project-card">
+          <div class="project-top">
+            <span class="folder-icon">📁</span>
+            <span class="project-links mono"><a href="#">GitHub</a> · <a href="#">Demo</a></span>
+          </div>
+          <h3>Project Title Four</h3>
+          <p>PLACEHOLDER — 2–3 sentences: the problem, your approach, and the result/impact.</p>
+          <p class="project-tags mono">LangChain · RAG · Vector DBs</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ===================== TECH STACK ===================== -->
+    <section id="techstack" class="section reveal">
+      <h2 class="section-title"><span class="mono accent">05.</span> Tech Stack</h2>
+      <!-- PLACEHOLDER: add/remove technologies as needed -->
+      <div class="stack-grid">
+        <span class="stack-pill glass">Python</span>
+        <span class="stack-pill glass">R</span>
+        <span class="stack-pill glass">SQL</span>
+        <span class="stack-pill glass">Pandas</span>
+        <span class="stack-pill glass">NumPy</span>
+        <span class="stack-pill glass">scikit-learn</span>
+        <span class="stack-pill glass">TensorFlow</span>
+        <span class="stack-pill glass">PyTorch</span>
+        <span class="stack-pill glass">Hugging Face</span>
+        <span class="stack-pill glass">Spark</span>
+        <span class="stack-pill glass">Airflow</span>
+        <span class="stack-pill glass">Docker</span>
+        <span class="stack-pill glass">AWS</span>
+        <span class="stack-pill glass">Azure</span>
+        <span class="stack-pill glass">Power BI</span>
+        <span class="stack-pill glass">Tableau</span>
+        <span class="stack-pill glass">Git</span>
+        <span class="stack-pill glass">MLflow</span>
+      </div>
+    </section>
+
+    <!-- ===================== CONTACT ===================== -->
+    <section id="contact" class="section reveal contact">
+      <h2 class="section-title centered"><span class="mono accent">06.</span> Get In Touch</h2>
+      <p class="contact-text">
+        <!-- PLACEHOLDER: replace with your own outro message -->
+        Whether you have a question, a project idea, or just want to talk data —
+        my inbox is always open.
+      </p>
+      <a href="mailto:your.email@example.com" class="btn btn-primary">Say Hello</a>
+      <div class="socials mono">
+        <!-- PLACEHOLDER: update links -->
+        <a href="https://github.com/yourusername">GitHub</a>
+        <a href="https://linkedin.com/in/yourusername">LinkedIn</a>
+        <a href="https://kaggle.com/yourusername">Kaggle</a>
+        <a href="https://medium.com/@yourusername">Medium</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer mono">
+    <p>Designed &amp; built by Your Name · © 2026</p>
+  </footer>
+
+  <!-- Three.js (UMD build — works when opening the file directly, no server needed) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
