@@ -118,6 +118,20 @@ This means the 3D background needs an internet connection to appear.
    GitHub (creating repos, pushing code) — into `~/.local/bin/gh`.
 9. **Made the 3D background interactive** — cursor repulsion, cursor-to-particle
    "synapse" lines, and a click shockwave (see the `js/main.js` notes above).
+10. **Logged in to GitHub** — you authorized the `gh` CLI in the browser with a
+    one-time device code, and `gh auth setup-git` was run so `git push` can use
+    those credentials automatically from now on.
+11. **Connected to your GitHub repo** — a repo named `Ishaan300104.github.io`
+    already existed on your account (containing one old file, `barcode.html`,
+    from 2022). Instead of deleting it, its history was **merged** into this
+    project, so `barcode.html` still exists alongside the site.
+12. **Pushed & deployed** — `git push` uploaded everything, and GitHub Pages
+    automatically built and published the site.
+
+## ✅ The site is LIVE at: <https://ishaan300104.github.io>
+
+Any time you `git push` from this folder, the live site updates itself within
+a minute or two. No other deployment step is ever needed.
 
 ---
 
