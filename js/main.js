@@ -86,11 +86,72 @@
     shapes.push(mesh);
   });
 
-  /* ---------- mouse parallax ---------- */
-  let mouseX = 0, mouseY = 0;
-  window.addEventListener("mousemove", (e) => {
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+  /* ---------- cursor "neuron" links ---------- */
+  // extra, brighter lines drawn from the cursor to nearby particles,
+  // so the mouse behaves like one more neuron joining the network
+  const CURSOR_LINK_DIST = 130;
+  const cursorLineGeo = new THREE.BufferGeometry();
+  const cursorLinePositions = new Float32Array(PARTICLE_COUNT * 6);
+  cursorLineGeo.setAttribute("position", new THREE.BufferAttribute(cursorLinePositions, 3));
+  const cursorLineMat = new THREE.LineBasicMaterial({
+    color: 0xb388ff,
+    transparent: true,
+    opacity: 0.45,
+  });
+  scene.add(new THREE.LineSegments(cursorLineGeo, cursorLineMat));
+
+  // a soft glowing dot that follows the cursor in 3D space
+  const cursorDot = new THREE.Mesh(
+    new THREE.SphereGeometry(3.5, 12, 12),
+    new THREE.MeshBasicMaterial({ color: 0xb388ff, transparent: true, opacity: 0.9 })
+  );
+  scene.add(cursorDot);
+
+  /* ---------- mouse tracking ---------- */
+  let mouseX = 0, mouseY = 0;           // normalized, for camera parallax
+  const ndc = new THREE.Vector2(-10, -10); // normalized device coords, for raycasting
+  const mouseWorld = new THREE.Vector3(9999, 9999, 0); // cursor position in 3D space
+  let mouseActive = false;
+
+  function updatePointer(clientX, clientY) {
+    mouseX = (clientX / window.innerWidth - 0.5) * 2;
+    mouseY = (clientY / window.innerHeight - 0.5) * 2;
+    ndc.x = (clientX / window.innerWidth) * 2 - 1;
+    ndc.y = -(clientY / window.innerHeight) * 2 + 1;
+    mouseActive = true;
+  }
+  window.addEventListener("mousemove", (e) => updatePointer(e.clientX, e.clientY));
+  window.addEventListener("touchmove", (e) => {
+    if (e.touches.length) updatePointer(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+  window.addEventListener("mouseleave", () => { mouseActive = false; });
+
+  // project the 2D cursor onto the z = 0 plane of the 3D scene
+  function updateMouseWorld() {
+    const ray = new THREE.Vector3(ndc.x, ndc.y, 0.5).unproject(camera).sub(camera.position).normalize();
+    const t = -camera.position.z / ray.z;
+    mouseWorld.copy(camera.position).add(ray.multiplyScalar(t));
+  }
+
+  /* ---------- click shockwave ---------- */
+  const REPEL_RADIUS = 100;
+  const REPEL_FORCE = 0.9;
+  const MAX_SPEED = 1.4;
+  const BASE_SPEED = 0.35;
+
+  window.addEventListener("click", () => {
+    if (!mouseActive) return;
+    // blast every particle within a wide radius away from the cursor
+    const BLAST_RADIUS = 260;
+    for (const p of particles) {
+      const d = p.pos.distanceTo(mouseWorld);
+      if (d < BLAST_RADIUS && d > 0.01) {
+        const strength = (1 - d / BLAST_RADIUS) * 6;
+        p.vel.add(p.pos.clone().sub(mouseWorld).normalize().multiplyScalar(strength));
+      }
+    }
+    // pulse the cursor dot
+    cursorDot.scale.setScalar(4);
   });
 
   /* ---------- animation loop ---------- */
@@ -98,9 +159,26 @@
   function animate(t) {
     requestAnimationFrame(animate);
 
-    // move particles, bounce at the edges
+    if (mouseActive) updateMouseWorld();
+
+    // move particles, bounce at the edges, react to the cursor
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const p = particles[i];
+
+      // cursor repulsion — particles flow away from the mouse like a fluid
+      if (mouseActive) {
+        const d = p.pos.distanceTo(mouseWorld);
+        if (d < REPEL_RADIUS && d > 0.01) {
+          const strength = (1 - d / REPEL_RADIUS) * REPEL_FORCE;
+          p.vel.add(p.pos.clone().sub(mouseWorld).normalize().multiplyScalar(strength * 0.15));
+        }
+      }
+
+      // damp back toward cruising speed so bursts settle smoothly
+      const speed = p.vel.length();
+      if (speed > MAX_SPEED) p.vel.multiplyScalar(0.96);
+      else if (speed > BASE_SPEED) p.vel.multiplyScalar(0.995);
+
       p.pos.add(p.vel);
       if (Math.abs(p.pos.x) > HALF) p.vel.x *= -1;
       if (Math.abs(p.pos.y) > HALF * 0.7) p.vel.y *= -1;
@@ -110,6 +188,28 @@
       pointPositions[i * 3 + 2] = p.pos.z;
     }
     pointsGeo.attributes.position.needsUpdate = true;
+
+    // draw glowing links from the cursor to nearby particles
+    let cursorLinks = 0;
+    if (mouseActive) {
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        if (particles[i].pos.distanceTo(mouseWorld) < CURSOR_LINK_DIST) {
+          const a = particles[i].pos;
+          cursorLinePositions.set(
+            [mouseWorld.x, mouseWorld.y, mouseWorld.z, a.x, a.y, a.z],
+            cursorLinks * 6
+          );
+          cursorLinks++;
+        }
+      }
+    }
+    cursorLineGeo.setDrawRange(0, cursorLinks * 2);
+    cursorLineGeo.attributes.position.needsUpdate = true;
+
+    // cursor dot follows the mouse; shrinks back after a click pulse
+    cursorDot.visible = mouseActive;
+    cursorDot.position.copy(mouseWorld);
+    if (cursorDot.scale.x > 1) cursorDot.scale.multiplyScalar(0.92);
 
     // rebuild links between close particles
     let linkIdx = 0;
