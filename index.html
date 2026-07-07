@@ -21,6 +21,7 @@
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#skills">Skills</a></li>
+      <li><a href="#lab">Lab</a></li>
       <li><a href="#experience">Experience</a></li>
       <li><a href="#projects">Projects</a></li>
       <li><a href="#techstack">Tech Stack</a></li>
@@ -85,29 +86,29 @@
       <h2 class="section-title"><span class="mono accent">02.</span> Skills</h2>
       <div class="cards-grid">
         <div class="card glass tilt">
-          <div class="card-icon">🤖</div>
-          <h3>Machine Learning</h3>
-          <p>PLACEHOLDER — e.g. supervised &amp; unsupervised learning, model selection, hyper-parameter tuning, ensembling.</p>
+          <div class="card-icon">💬</div>
+          <h3>NLP &amp; Transformers</h3>
+          <p>PLACEHOLDER — e.g. attention mechanisms, BERT/GPT fine-tuning, embeddings, NER, text classification, RAG pipelines.</p>
+        </div>
+        <div class="card glass tilt">
+          <div class="card-icon">👁️</div>
+          <h3>Computer Vision</h3>
+          <p>PLACEHOLDER — classical CV (filters, feature extraction, OpenCV) and modern CV (CNNs, YOLO, ViTs, segmentation, detection).</p>
         </div>
         <div class="card glass tilt">
           <div class="card-icon">🧠</div>
           <h3>Deep Learning</h3>
-          <p>PLACEHOLDER — e.g. CNNs, RNNs/Transformers, transfer learning, fine-tuning LLMs.</p>
+          <p>PLACEHOLDER — e.g. architecture design, training &amp; optimization, transfer learning, PyTorch / TensorFlow.</p>
         </div>
         <div class="card glass tilt">
-          <div class="card-icon">💬</div>
-          <h3>NLP</h3>
-          <p>PLACEHOLDER — e.g. text classification, embeddings, RAG pipelines, sentiment analysis.</p>
+          <div class="card-icon">🤖</div>
+          <h3>Classical ML</h3>
+          <p>PLACEHOLDER — e.g. regression, SVMs, tree ensembles (XGBoost/LightGBM), clustering, feature engineering.</p>
         </div>
         <div class="card glass tilt">
           <div class="card-icon">📊</div>
           <h3>Data Visualization</h3>
           <p>PLACEHOLDER — e.g. dashboards, storytelling with data, Plotly / Power BI / Tableau.</p>
-        </div>
-        <div class="card glass tilt">
-          <div class="card-icon">📐</div>
-          <h3>Statistics &amp; A/B Testing</h3>
-          <p>PLACEHOLDER — e.g. hypothesis testing, causal inference, experiment design, Bayesian methods.</p>
         </div>
         <div class="card glass tilt">
           <div class="card-icon">⚙️</div>
@@ -117,9 +118,52 @@
       </div>
     </section>
 
+    <!-- ===================== INTERACTIVE LAB ===================== -->
+    <section id="lab" class="section reveal">
+      <h2 class="section-title"><span class="mono accent">03.</span> ML in Motion — Interactive Lab</h2>
+      <p class="lab-intro">
+        Live, hands-on visualizations of the things I work with every day.
+        Hover and click around — everything reacts.
+      </p>
+      <div class="lab-grid">
+        <div class="lab-panel glass">
+          <div class="lab-head">
+            <h3>Self-Attention</h3>
+            <span class="mono lab-tag">NLP · Transformers</span>
+          </div>
+          <canvas id="attention-canvas"></canvas>
+          <p class="lab-hint mono">hover a token to make it the query</p>
+        </div>
+        <div class="lab-panel glass">
+          <div class="lab-head">
+            <h3>Convolution</h3>
+            <span class="mono lab-tag">Computer Vision</span>
+          </div>
+          <canvas id="conv-canvas"></canvas>
+          <p class="lab-hint mono">move your mouse over the image to drive the kernel</p>
+        </div>
+        <div class="lab-panel glass">
+          <div class="lab-head">
+            <h3>Gradient Descent</h3>
+            <span class="mono lab-tag">Deep Learning</span>
+          </div>
+          <canvas id="gd-canvas"></canvas>
+          <p class="lab-hint mono">click anywhere on the loss surface to drop a ball</p>
+        </div>
+        <div class="lab-panel glass">
+          <div class="lab-head">
+            <h3>K-Means Clustering</h3>
+            <span class="mono lab-tag">Classical ML</span>
+          </div>
+          <canvas id="kmeans-canvas"></canvas>
+          <p class="lab-hint mono">click to add data points</p>
+        </div>
+      </div>
+    </section>
+
     <!-- ===================== EXPERIENCE ===================== -->
     <section id="experience" class="section reveal">
-      <h2 class="section-title"><span class="mono accent">03.</span> Experience</h2>
+      <h2 class="section-title"><span class="mono accent">04.</span> Experience</h2>
       <div class="timeline">
         <div class="timeline-item glass">
           <span class="timeline-date mono accent">2024 — Present</span>
@@ -150,7 +194,7 @@
 
     <!-- ===================== PROJECTS ===================== -->
     <section id="projects" class="section reveal">
-      <h2 class="section-title"><span class="mono accent">04.</span> Projects</h2>
+      <h2 class="section-title"><span class="mono accent">05.</span> Projects</h2>
       <div class="cards-grid">
         <article class="card glass tilt project-card">
           <div class="project-top">
@@ -177,7 +221,7 @@
           </div>
           <h3>Project Title Three</h3>
           <p>PLACEHOLDER — 2–3 sentences: the problem, your approach, and the result/impact.</p>
-          <p class="project-tags mono">SQL · Airflow · Power BI</p>
+          <p class="project-tags mono">OpenCV · YOLO · TensorRT</p>
         </article>
         <article class="card glass tilt project-card">
           <div class="project-top">
@@ -193,7 +237,7 @@
 
     <!-- ===================== TECH STACK ===================== -->
     <section id="techstack" class="section reveal">
-      <h2 class="section-title"><span class="mono accent">05.</span> Tech Stack</h2>
+      <h2 class="section-title"><span class="mono accent">06.</span> Tech Stack</h2>
       <!-- PLACEHOLDER: add/remove technologies as needed -->
       <div class="stack-grid">
         <span class="stack-pill glass">Python</span>
@@ -205,6 +249,11 @@
         <span class="stack-pill glass">TensorFlow</span>
         <span class="stack-pill glass">PyTorch</span>
         <span class="stack-pill glass">Hugging Face</span>
+        <span class="stack-pill glass">Transformers</span>
+        <span class="stack-pill glass">OpenCV</span>
+        <span class="stack-pill glass">YOLO</span>
+        <span class="stack-pill glass">spaCy</span>
+        <span class="stack-pill glass">ONNX</span>
         <span class="stack-pill glass">Spark</span>
         <span class="stack-pill glass">Airflow</span>
         <span class="stack-pill glass">Docker</span>
@@ -219,7 +268,7 @@
 
     <!-- ===================== CONTACT ===================== -->
     <section id="contact" class="section reveal contact">
-      <h2 class="section-title centered"><span class="mono accent">06.</span> Get In Touch</h2>
+      <h2 class="section-title centered"><span class="mono accent">07.</span> Get In Touch</h2>
       <p class="contact-text">
         <!-- PLACEHOLDER: replace with your own outro message -->
         Whether you have a question, a project idea, or just want to talk data —
@@ -244,5 +293,6 @@
   <!-- Three.js (UMD build — works when opening the file directly, no server needed) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/lab.js"></script>
 </body>
 </html>

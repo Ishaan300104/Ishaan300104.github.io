@@ -34,7 +34,8 @@ portfolio-website/
 ├── css/
 │   └── style.css   ← All colors, fonts, layout, hover effects, animations.
 ├── js/
-│   └── main.js     ← The 3D background, typing effect, scroll animations, tilt cards.
+│   ├── main.js     ← The 3D background, typing effect, scroll animations, tilt cards.
+│   └── lab.js      ← The four "ML in Motion" interactive demos (see below).
 ├── assets/         ← Put your images & files here (profile.jpg, resume.pdf).
 ├── README.md       ← Quick-reference: what to edit + how to deploy.
 ├── GUIDE.md        ← This file.
@@ -127,6 +128,23 @@ This means the 3D background needs an internet connection to appear.
     project, so `barcode.html` still exists alongside the site.
 12. **Pushed & deployed** — `git push` uploaded everything, and GitHub Pages
     automatically built and published the site.
+13. **Added the "ML in Motion" Interactive Lab** (`js/lab.js`) — four live demos
+    themed to NLP, Computer Vision, Deep Learning, and Classical ML:
+    - **Self-Attention** — tokens of *"attention is all you need"* with animated
+      attention arcs from a query token (two colored "heads" with pulses).
+      Hover a token to make it the query.
+    - **Convolution** — a real 3×3 edge-detection kernel scans an image grid and
+      writes the actual convolved feature map. Move your mouse over the input
+      image to drive the kernel yourself.
+    - **Gradient Descent** — a rotating 3D loss surface (Three.js) where glowing
+      balls roll downhill using real gradients + momentum, leaving trails.
+      Click the surface to drop a new ball.
+    - **K-Means Clustering** — points cluster around pulsing centroids that run
+      real assign/update steps; the data re-shuffles every few seconds. Click to
+      inject your own points.
+    Each demo pauses automatically when scrolled off-screen (to save battery),
+    and the Skills / Tech Stack / typing-roles content was retuned to an
+    NLP + CV + Deep Learning profile.
 
 ## ✅ The site is LIVE at: <https://ishaan300104.github.io>
 

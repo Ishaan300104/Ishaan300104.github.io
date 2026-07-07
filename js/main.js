@@ -254,9 +254,9 @@
 (function initTyping() {
   const roles = [
     "Data Scientist",
-    "ML Engineer",
-    "Storyteller with Data",
-    "Problem Solver",
+    "NLP Engineer",
+    "Computer Vision Engineer",
+    "Deep Learning Practitioner",
   ];
   const el = document.getElementById("typed-role");
   let roleIdx = 0, charIdx = 0, deleting = false;
