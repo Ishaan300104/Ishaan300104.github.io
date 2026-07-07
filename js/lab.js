@@ -538,4 +538,255 @@
     requestAnimationFrame(draw);
   })();
 
+  /* =========================================================
+     5. VISION TRANSFORMER — an image is split into patches;
+        attention flows from a query patch to the others based
+        on patch content similarity and distance. Hover a patch
+        to make it the query.
+     ========================================================= */
+  (function vitDemo() {
+    const canvas = document.getElementById("vit-canvas");
+    if (!canvas) return;
+    const state = { visible: true, hover: -1, query: 5, lastSwitch: 0, geom: null };
+    watchVisibility(canvas, state);
+
+    const N = 16, P = 4, PP = N / P; // 16×16 image → 4×4 grid of patches
+
+    // input image: a bright blob + a diagonal stripe
+    const img = [];
+    for (let r = 0; r < N; r++) {
+      img[r] = [];
+      for (let c = 0; c < N; c++) {
+        const dx = c - 5, dy = r - 10;
+        const blob = Math.exp(-(dx * dx + dy * dy) / 14);
+        const stripe = Math.max(0, 1 - Math.abs(c + r - 18) / 3) * 0.8;
+        img[r][c] = Math.min(1, blob + stripe + 0.05);
+      }
+    }
+
+    // mean intensity per patch → content-similarity-based attention
+    const means = [];
+    for (let p = 0; p < P * P; p++) {
+      const pr = Math.floor(p / P) * PP, pc = (p % P) * PP;
+      let s = 0;
+      for (let r = 0; r < PP; r++) for (let c = 0; c < PP; c++) s += img[pr + r][pc + c];
+      means.push(s / (PP * PP));
+    }
+    function attn(q, k) {
+      if (q === k) return 1;
+      const qr = Math.floor(q / P), qc = q % P;
+      const kr = Math.floor(k / P), kc = k % P;
+      const dist = Math.hypot(qr - kr, qc - kc);
+      return Math.exp(-Math.abs(means[q] - means[k]) * 4) * Math.exp(-dist / 2.2);
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!state.geom) return;
+      const rect = canvas.getBoundingClientRect();
+      const g = state.geom;
+      const c = Math.floor((e.clientX - rect.left - g.x0) / g.patchPx);
+      const r = Math.floor((e.clientY - rect.top - g.y0) / g.patchPx);
+      state.hover = (r >= 0 && r < P && c >= 0 && c < P) ? r * P + c : -1;
+    });
+    canvas.addEventListener("mouseleave", () => { state.hover = -1; });
+
+    function draw(t) {
+      requestAnimationFrame(draw);
+      if (!state.visible) return;
+      const { ctx, w, h } = fitCanvas(canvas);
+      ctx.clearRect(0, 0, w, h);
+
+      if (state.hover >= 0) {
+        state.query = state.hover;
+        state.lastSwitch = t;
+      } else if (t - state.lastSwitch > 2000) {
+        state.query = (state.query + 1) % (P * P);
+        state.lastSwitch = t;
+      }
+
+      const size = Math.min(h - 46, w - 40);
+      const x0 = (w - size) / 2, y0 = (h - size) / 2 + 6;
+      const px = size / N, patchPx = size / P;
+      state.geom = { x0, y0, patchPx };
+
+      // image pixels (cyan intensities)
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          ctx.fillStyle = `rgba(102,217,255,${0.05 + img[r][c] * 0.7})`;
+          ctx.fillRect(x0 + c * px, y0 + r * px, px - 0.5, px - 0.5);
+        }
+      }
+
+      // attention overlay per patch, normalized to the strongest key
+      let wmax = 0;
+      for (let k = 0; k < P * P; k++) if (k !== state.query) wmax = Math.max(wmax, attn(state.query, k));
+      const centers = [];
+      for (let k = 0; k < P * P; k++) {
+        const kr = Math.floor(k / P), kc = k % P;
+        const cx = x0 + (kc + 0.5) * patchPx, cy = y0 + (kr + 0.5) * patchPx;
+        centers.push([cx, cy]);
+        if (k === state.query) continue;
+        const wn = attn(state.query, k) / wmax;
+        ctx.fillStyle = `rgba(179,136,255,${wn * 0.42})`;
+        ctx.fillRect(x0 + kc * patchPx, y0 + kr * patchPx, patchPx, patchPx);
+      }
+
+      // patch grid lines
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= P; i++) {
+        ctx.beginPath();
+        ctx.moveTo(x0 + i * patchPx, y0); ctx.lineTo(x0 + i * patchPx, y0 + size);
+        ctx.moveTo(x0, y0 + i * patchPx); ctx.lineTo(x0 + size, y0 + i * patchPx);
+        ctx.stroke();
+      }
+
+      // attention lines from the query patch, with traveling pulses
+      const [qx, qy] = centers[state.query];
+      for (let k = 0; k < P * P; k++) {
+        if (k === state.query) continue;
+        const wn = attn(state.query, k) / wmax;
+        if (wn < 0.12) continue;
+        const [cx, cy] = centers[k];
+        ctx.strokeStyle = PURPLE;
+        ctx.globalAlpha = wn * 0.55;
+        ctx.lineWidth = 0.5 + wn * 2.2;
+        ctx.beginPath();
+        ctx.moveTo(qx, qy);
+        ctx.lineTo(cx, cy);
+        ctx.stroke();
+        const p = ((t * 0.0005) + k * 0.19) % 1;
+        ctx.globalAlpha = wn;
+        ctx.fillStyle = PURPLE;
+        ctx.beginPath();
+        ctx.arc(qx + (cx - qx) * p, qy + (cy - qy) * p, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // query patch highlight
+      const qr = Math.floor(state.query / P), qc = state.query % P;
+      ctx.strokeStyle = MINT;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x0 + qc * patchPx, y0 + qr * patchPx, patchPx, patchPx);
+
+      ctx.fillStyle = "rgba(170,179,197,0.55)";
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.textAlign = "left";
+      ctx.fillText("image → 16 patches → self-attention", 12, 18);
+    }
+    requestAnimationFrame(draw);
+  })();
+
+  /* =========================================================
+     6. SIMULATED ANNEALING — travelling-salesman tour that
+        continuously re-optimizes with 2-opt moves under a
+        cooling temperature. Click to add a city (the tour
+        reheats and adapts).
+     ========================================================= */
+  (function tspDemo() {
+    const canvas = document.getElementById("tsp-canvas");
+    if (!canvas) return;
+    const state = { visible: true, inited: false, T: 60, flash: 0, restartAt: 0 };
+    watchVisibility(canvas, state);
+
+    let cities = [], route = [];
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+    function tourLen() {
+      let s = 0;
+      for (let i = 0; i < route.length; i++) {
+        s += dist(cities[route[i]], cities[route[(i + 1) % route.length]]);
+      }
+      return s;
+    }
+
+    function init(w, h) {
+      cities = Array.from({ length: 13 }, () => [
+        22 + Math.random() * (w - 44),
+        26 + Math.random() * (h - 52),
+      ]);
+      route = cities.map((_, i) => i);
+      state.T = 60;
+      state.restartAt = 0;
+      state.inited = true;
+    }
+
+    canvas.addEventListener("click", (e) => {
+      if (!state.inited) return;
+      const r = canvas.getBoundingClientRect();
+      if (cities.length >= 22) return;
+      cities.push([e.clientX - r.left, e.clientY - r.top]);
+      route.push(cities.length - 1);
+      state.T = Math.max(state.T, 25); // reheat so the tour re-optimizes
+      state.restartAt = 0;
+    });
+
+    function draw(t) {
+      requestAnimationFrame(draw);
+      if (!state.visible) return;
+      const { ctx, w, h } = fitCanvas(canvas);
+      if (!state.inited) init(w, h);
+      ctx.clearRect(0, 0, w, h);
+
+      const n = route.length;
+
+      // annealing: a batch of 2-opt attempts per frame
+      if (state.T > 0.05) {
+        for (let tries = 0; tries < 60; tries++) {
+          let i = 1 + Math.floor(Math.random() * (n - 2));
+          let j = i + 1 + Math.floor(Math.random() * (n - i - 1));
+          const a = cities[route[i - 1]], b = cities[route[i]];
+          const c = cities[route[j]], d = cities[route[(j + 1) % n]];
+          const delta = dist(a, c) + dist(b, d) - dist(a, b) - dist(c, d);
+          if (delta < 0 || Math.random() < Math.exp(-delta / state.T)) {
+            // reverse the segment route[i..j]
+            for (let lo = i, hi = j; lo < hi; lo++, hi--) {
+              const tmp = route[lo]; route[lo] = route[hi]; route[hi] = tmp;
+            }
+            if (delta < 0) state.flash = 1;
+          }
+        }
+        state.T *= 0.995;
+      } else if (!state.restartAt) {
+        state.restartAt = t + 3000; // admire the optimized tour, then new cities
+      } else if (t > state.restartAt) {
+        init(w, h);
+      }
+
+      // tour edges
+      ctx.strokeStyle = PURPLE;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = 1.4 + state.flash * 1.6;
+      ctx.beginPath();
+      const first = cities[route[0]];
+      ctx.moveTo(first[0], first[1]);
+      for (let i = 1; i <= n; i++) {
+        const p = cities[route[i % n]];
+        ctx.lineTo(p[0], p[1]);
+      }
+      ctx.stroke();
+      state.flash *= 0.9;
+
+      // cities
+      ctx.globalAlpha = 1;
+      cities.forEach((cty, i) => {
+        ctx.fillStyle = i === route[0] ? MINT : CYAN;
+        ctx.beginPath();
+        ctx.arc(cty[0], cty[1], i === route[0] ? 4 : 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // status line
+      ctx.fillStyle = "rgba(170,179,197,0.6)";
+      ctx.font = "11px 'JetBrains Mono', monospace";
+      ctx.textAlign = "left";
+      const status = state.T > 0.05
+        ? `tour: ${Math.round(tourLen())}px   T: ${state.T.toFixed(2)}`
+        : `tour: ${Math.round(tourLen())}px   ✓ converged`;
+      ctx.fillText(status, 12, 18);
+    }
+    requestAnimationFrame(draw);
+  })();
+
 })();

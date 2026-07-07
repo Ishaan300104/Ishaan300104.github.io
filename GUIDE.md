@@ -142,9 +142,18 @@ This means the 3D background needs an internet connection to appear.
     - **K-Means Clustering** — points cluster around pulsing centroids that run
       real assign/update steps; the data re-shuffles every few seconds. Click to
       inject your own points.
+    - **Patch Attention** — a Vision-Transformer-style demo: an image is split
+      into 16 patches and attention flows from a query patch to the others
+      (weighted by patch content similarity + distance). Hover a patch to make
+      it the query.
+    - **Simulated Annealing · TSP** — a travelling-salesman tour that
+      continuously improves itself with 2-opt moves under a cooling
+      temperature, showing live tour length and temperature. Click to add a
+      city — the system "reheats" and re-optimizes.
     Each demo pauses automatically when scrolled off-screen (to save battery),
     and the Skills / Tech Stack / typing-roles content was retuned to an
-    NLP + CV + Deep Learning profile.
+    NLP + CV + Deep Learning profile, with Vision Transformers and
+    Mathematical Optimization added as dedicated skill cards.
 
 ## ✅ The site is LIVE at: <https://ishaan300104.github.io>
 
