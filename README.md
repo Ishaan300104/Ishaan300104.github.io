@@ -22,6 +22,20 @@ Just double-click `index.html`. That's it.
 | Your photo | Save as `assets/profile.jpg`, then replace the `.photo-placeholder` div with `<img src="assets/profile.jpg" alt="Your Name" />` |
 | Résumé | Save as `assets/resume.pdf` |
 | Colors | `css/style.css` → the `:root` variables at the top |
+| Commit globe data | Generated — see below |
+
+## Commit globe ("Where I Ship Code")
+
+The globe shows where and when you commit. Git doesn't record location, so a small
+post-commit hook logs it on your machine, and you publish it to the site when you like:
+
+```bash
+node tools/commit-globe/commit-globe.js install ~/code   # once: hook this repo, repos under ~/code, and future clones
+node tools/commit-globe/commit-globe.js publish          # whenever: refresh data/commits.js, then commit & push
+```
+
+Commits from private repos only show city + time. Until you publish, the globe shows
+badged sample data. Details, VPN tips and uninstall: [tools/commit-globe/README.md](tools/commit-globe/README.md).
 
 ## Deploy for free
 

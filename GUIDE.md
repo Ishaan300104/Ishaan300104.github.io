@@ -35,7 +35,13 @@ portfolio-website/
 │   └── style.css   ← All colors, fonts, layout, hover effects, animations.
 ├── js/
 │   ├── main.js     ← The 3D background, typing effect, scroll animations, tilt cards.
-│   └── lab.js      ← The four "ML in Motion" interactive demos (see below).
+│   ├── lab.js      ← The four "ML in Motion" interactive demos (see below).
+│   ├── globe.js    ← The "Where I Ship Code" commit globe.
+│   └── world-land.js ← A tiny map of where land is, used to draw the globe's dots.
+├── data/
+│   └── commits.js  ← Your commits for the globe (generated — don't edit by hand).
+├── tools/
+│   └── commit-globe/ ← The git hook + command-line tool that fills data/commits.js.
 ├── assets/         ← Put your images & files here (profile.jpg, resume.pdf).
 ├── README.md       ← Quick-reference: what to edit + how to deploy.
 ├── GUIDE.md        ← This file.
@@ -154,6 +160,24 @@ This means the 3D background needs an internet connection to appear.
     and the Skills / Tech Stack / typing-roles content was retuned to an
     NLP + CV + Deep Learning profile, with Vision Transformers and
     Mathematical Optimization added as dedicated skill cards.
+14. **Added the "Where I Ship Code" commit globe** (`js/globe.js`) — a dotted 3D
+    Earth with a glowing beam for every city you've committed code from (taller
+    beam = more commits) and arcs tracing your trips between them in order.
+    Drag to spin it, click a beam (or a commit in the list) to fly there; the side
+    panel shows totals, a "commits by local hour" chart, and your latest commits.
+    - **Why it needs a helper tool:** git never records *where* a commit was made.
+      So `tools/commit-globe/` installs a **git hook** — a tiny script git runs
+      automatically after every `git commit` — that notes the time, repo and
+      message, and looks up your city from your internet connection. That log
+      stays private on your computer (`~/.commit-globe/commits.tsv`).
+    - **Getting it onto the site** is a deliberate step: `publish` turns the log
+      into `data/commits.js`, hiding everything except city + time for commits
+      from private repos (it asks GitHub which repos are public). You then commit
+      and push like any other change.
+    - Until you publish real data, the globe shows sample data with a
+      "sample data" badge.
+    - Full instructions (setup, VPN tips, uninstall):
+      [`tools/commit-globe/README.md`](tools/commit-globe/README.md).
 
 ## ✅ The site is LIVE at: <https://ishaan300104.github.io>
 
