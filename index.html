@@ -24,6 +24,7 @@
       <li><a href="#lab">Lab</a></li>
       <li><a href="#experience">Experience</a></li>
       <li><a href="#projects">Projects</a></li>
+      <li><a href="#globe">Globe</a></li>
       <li><a href="#techstack">Tech Stack</a></li>
       <li><a href="#contact" class="nav-cta">Contact</a></li>
     </ul>
@@ -261,9 +262,44 @@
       </div>
     </section>
 
+    <!-- ===================== COMMIT GLOBE ===================== -->
+    <!-- Data comes from data/commits.js — see tools/commit-globe/README.md -->
+    <section id="globe" class="section reveal">
+      <h2 class="section-title"><span class="mono accent">06.</span> Where I Ship Code</h2>
+      <p class="lab-intro">
+        Every beam is a city I've committed code from — logged by a git hook the moment
+        I commit. Arcs trace my trips between them, in order.
+      </p>
+      <div class="globe-layout">
+        <div class="globe-stage glass">
+          <canvas id="globe-canvas" role="img" aria-label="3D globe of where my commits were made"></canvas>
+          <div class="globe-tooltip" hidden></div>
+          <span class="globe-badge mono" hidden>sample data · no commits published yet</span>
+          <p class="globe-hint mono">drag to spin · click a beam to focus</p>
+        </div>
+        <aside class="globe-panel glass">
+          <div class="globe-scope">
+            <h3 class="globe-scope-title">All locations</h3>
+            <button type="button" class="globe-scope-clear mono" hidden>show all</button>
+          </div>
+          <div class="globe-stats"></div>
+          <div class="globe-hours">
+            <h4 class="globe-subhead">Commits by local hour</h4>
+            <div class="hour-chart" role="img"></div>
+            <div class="hour-axis mono"><span>00</span><span>06</span><span>12</span><span>18</span></div>
+            <p class="hour-caption mono"></p>
+          </div>
+          <div class="globe-feed">
+            <h4 class="globe-subhead">Latest commits</h4>
+            <ol class="feed-list"></ol>
+          </div>
+        </aside>
+      </div>
+    </section>
+
     <!-- ===================== TECH STACK ===================== -->
     <section id="techstack" class="section reveal">
-      <h2 class="section-title"><span class="mono accent">06.</span> Tech Stack</h2>
+      <h2 class="section-title"><span class="mono accent">07.</span> Tech Stack</h2>
       <!-- PLACEHOLDER: add/remove technologies as needed -->
       <div class="stack-grid">
         <span class="stack-pill glass">Python</span>
@@ -297,7 +333,7 @@
 
     <!-- ===================== CONTACT ===================== -->
     <section id="contact" class="section reveal contact">
-      <h2 class="section-title centered"><span class="mono accent">07.</span> Get In Touch</h2>
+      <h2 class="section-title centered"><span class="mono accent">08.</span> Get In Touch</h2>
       <p class="contact-text">
         <!-- PLACEHOLDER: replace with your own outro message -->
         Whether you have a question, a project idea, or just want to talk data —
@@ -323,5 +359,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/main.js"></script>
   <script src="js/lab.js"></script>
+  <script src="js/world-land.js"></script>
+  <script src="data/commits.js"></script>
+  <script src="js/globe.js"></script>
 </body>
 </html>
