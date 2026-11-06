@@ -10,8 +10,8 @@ window.COMMIT_CITY = {
       "name": "Ishaan300104.github.io",
       "url": "https://github.com/Ishaan300104/Ishaan300104.github.io",
       "private": false,
-      "commits": 13,
-      "lastCommit": "2026-11-06T10:43:15Z",
+      "commits": 16,
+      "lastCommit": "2026-11-06T14:57:07Z",
       "language": "JavaScript"
     },
     {
