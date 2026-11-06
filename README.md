@@ -28,7 +28,7 @@ Just double-click `index.html`. That's it.
 
 A Tron-style 3D skyline: one tower per repo, one floor per commit you wrote. A crane
 builds the repo you committed to last. Private repos show their floors but not their names.
-Past a gold plaza, an Art Deco tower holds your public Hugging Face projects (`NotIshaan`), one tier each.
+Past a gold plaza, a gold futuristic megastructure holds your public Hugging Face projects (`NotIshaan`), one tier each.
 
 The data (`data/city.js`) is refreshed every 6 hours by
 `.github/workflows/commit-city.yml`. It commits only when a count changes.

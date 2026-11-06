@@ -167,6 +167,10 @@ This means the 3D background needs an internet connection to appear.
     - **One tower = one repo. One floor = one of your commits** on the repo's main
       branch. Repos above 60 commits get 60 floors plus a glowing spire; the
       label always shows the true count.
+    - Every tower is a futuristic skyscraper: a tapered square spire, a
+      twisting tower, a hex spire or a turning octagon (picked per repo, so
+      it never changes). Taller ones get a podium base, glowing crown bands,
+      antennas or spinning halo rings.
     - The newest repos stand on the right, where the camera starts. Drag, swipe,
       use ◀ ▶, or the arrow keys to see older ones. Click a tower for details.
     - **Private repos** show as purple towers labelled "🔒 private": the floors
@@ -179,9 +183,11 @@ This means the 3D background needs an internet connection to appear.
       repo and writes `data/city.js`. It commits that file **only if a number
       changed** — no new commits means no new commit from the bot.
     - **The Hugging Face tower:** past a gold plaza at the right end stands one
-      Art Deco tower. Each tier is one of your public Hugging Face projects
-      (user `NotIshaan`), oldest at the bottom, with a stepped crown, spire and
-      searchlights on top. Tiers have no commit count — one project, one tier.
+      gold megastructure on a hex podium. Each octagonal tier is one of your
+      public Hugging Face projects (user `NotIshaan`), oldest at the bottom,
+      each turned a little further and ringed with light. Neon struts brace it,
+      and a twisting crown with spinning halos, a needle spire and searchlights
+      sit on top. Tiers have no commit count — one project, one tier.
       Pan to it (or press Home) to see each tier's name; click a tier for details.
     - It needs a read-only token to see private repos. One-time setup:
       [`tools/commit-city/README.md`](tools/commit-city/README.md).

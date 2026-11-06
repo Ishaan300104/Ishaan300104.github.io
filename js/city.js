@@ -4,8 +4,8 @@
    Data: data/city.js, refreshed every 6 hours by
    .github/workflows/commit-city.yml (tools/commit-city/build.js).
    A crane builds the next floor on the repo I committed to last.
-   Past a plaza at the right end, an Art Deco tower holds my
-   Hugging Face projects: one setback tier per project.
+   Past a plaza at the right end, a gold megastructure holds my
+   Hugging Face projects: one turning tier per project.
    Built with Three.js (r128 UMD build, loaded in index.html).
    ========================================================= */
 
@@ -17,7 +17,7 @@
 
   /* ---------- tuning ---------- */
   const CYAN = 0x66d9ff, PURPLE = 0xb388ff, ORANGE = 0xff9e3d, BG = 0x03050b;
-  const FLOOR_H = 1.0;        // height of one floor (one commit)
+  const FLOOR_H = 1.5;        // height of one floor (one commit)
   const MAX_FLOORS = 60;      // above this, extra commits become a spire
   const LOT = 12;             // lot pitch along the street
   const ROAD = 8;             // extra gap for a cross street
@@ -62,32 +62,49 @@
   const empty = repos.length === 0;
 
   const colX = (c) => c * LOT + Math.floor(c / BLOCK) * ROAD;
+  // futuristic shapes: prism sides, how much it narrows to the top, how far it turns
+  const STYLES = [
+    { sides: 4, taper: 0.68, twist: 0 },              // tapered square spire
+    { sides: 4, taper: 0.9, twist: Math.PI / 2 },     // twisting tower
+    { sides: 6, taper: 0.58, twist: 0 },              // hex spire
+    { sides: 8, taper: 0.78, twist: Math.PI / 5 },    // turning octagon
+  ];
   const lots = repos.map((r, i) => {
     const rnd = seeded(String(r.id));
     const floors = Math.min(r.commits, MAX_FLOORS);
+    const style = STYLES[Math.floor(rnd() * STYLES.length)];
+    const w = 4.4 + rnd() * 1.6;                 // slim footprints read as skyscrapers
+    const grow = clamp(floors / 24, 0.25, 1);      // short towers bend gently
+    const extra = r.commits - floors;
     return {
       repo: r, index: i,
       x: colX(Math.floor(i / 2)), z: ROW_Z[(repos.length - 1 - i) % 2 === 0 ? 1 : 0],
-      w: 6 + rnd() * 2.5, d: 6 + rnd() * 2.5,
-      floors, extra: r.commits - floors,
+      w, d: w, style,
+      taper: lerp(1, style.taper, grow), twist: style.twist * grow,
+      podium: floors >= 12,
+      halo: floors >= 8 && rnd() < 0.5,
+      antennaH: !extra && floors >= 5 && rnd() < 0.55 ? 3 + rnd() * 4 : 0,
+      floors, extra,
       tint: r.private ? PURPLE : CYAN,
     };
   });
   // the newest repo gets the crane; with no data, an empty lot does
   const active = empty
-    ? { repo: null, x: 0, z: ROW_Z[1], w: 7, d: 7, floors: 0, extra: 0, tint: ORANGE }
+    ? { repo: null, x: 0, z: ROW_Z[1], w: 5.5, d: 5.5, style: STYLES[0], taper: 1, twist: 0, floors: 0, extra: 0, antennaH: 0 }
     : lots[lots.length - 1];
   active.tint = ORANGE;
   active.active = true;
+  active.halo = false;                         // the crane works on the roof
+  active.antennaH = 0;
 
   const minX = 0;
   const maxX = empty ? 0 : colX(Math.floor((lots.length - 1) / 2));
   const spireH = (l) => (l.extra > 0 ? 6 + 5 * Math.log2(1 + l.extra / MAX_FLOORS) : 0);
   const slotH = (l) => (l.active ? FLOOR_H : 0);
-  const topOf = (l) => l.floors * FLOOR_H + slotH(l) + spireH(l);
+  const topOf = (l) => l.floors * FLOOR_H + slotH(l) + spireH(l) + (l.antennaH || 0);
   const maxTop = Math.max(14, ...lots.map(topOf), topOf(active) + 12);
 
-  /* ---------- Hugging Face district: one Art Deco tower, one tier per project ---------- */
+  /* ---------- Hugging Face district: one megastructure, one tier per project ---------- */
   const GOLD = 0xffc94d;
   const hfItems = ((window.COMMIT_CITY && window.COMMIT_CITY.hf) || [])
     .filter((x) => x && x.id)
@@ -97,12 +114,12 @@
   const HF_ON = hfItems.length > 0;
   const PLAZA_X0 = maxX + LOT / 2 + ROAD;    // where the GitHub streets end
   const HF_X = PLAZA_X0 + 34;                 // tower centre
-  const PODIUM_W = 26, PODIUM_H = 4;
+  const PODIUM_H = 4.5;
   const TIER_H = clamp(40 / Math.max(1, hfItems.length), 2.4, 5.5);
-  const tierW = (i) => lerp(20, 7.5, hfItems.length > 1 ? i / (hfItems.length - 1) : 0);
+  const tierApo = (i) => lerp(9.2, 4.2, hfItems.length > 1 ? i / (hfItems.length - 1) : 0);
   const tierTop = PODIUM_H + hfItems.length * TIER_H;
-  const CROWN = [6.5, 5, 3.5], CROWN_H = 2.4, HF_SPIRE = 16;
-  const hfTop = HF_ON ? tierTop + CROWN.length * CROWN_H + HF_SPIRE : 0;
+  const CROWN_H = 7, HF_SPIRE = 16;
+  const hfTop = HF_ON ? tierTop + CROWN_H + HF_SPIRE : 0;
   const panMax = HF_ON ? HF_X : maxX;
   const cityEnd = HF_ON ? HF_X + 30 : maxX;
 
@@ -161,28 +178,6 @@
     return new THREE.MeshBasicMaterial({ map: t });
   }
 
-  // Art Deco facade: gold piers with tall narrow windows between them
-  let decoCanvas = null;
-  function decoMat(width, floors) {
-    if (!decoCanvas) {
-      decoCanvas = document.createElement("canvas");
-      decoCanvas.width = 64; decoCanvas.height = 32;
-      const g = decoCanvas.getContext("2d");
-      g.fillStyle = "#07060a"; g.fillRect(0, 0, 64, 32);
-      g.fillStyle = "#ffc94d";
-      g.globalAlpha = 0.75; g.fillRect(0, 0, 2, 32);          // main pier
-      g.globalAlpha = 0.3; g.fillRect(31, 0, 1, 32);          // minor pier
-      g.globalAlpha = 0.2; g.fillRect(0, 30, 64, 2);          // floor line
-      g.globalAlpha = 0.42; g.fillRect(12, 6, 10, 20);        // tall narrow windows
-      g.globalAlpha = 0.16; g.fillRect(43, 6, 10, 20);
-    }
-    const t = new THREE.CanvasTexture(decoCanvas);
-    t.wrapS = t.wrapT = THREE.RepeatWrapping;
-    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    t.repeat.set(Math.max(1, Math.round(width / 3)) / 2, floors);
-    return new THREE.MeshBasicMaterial({ map: t });
-  }
-
   /* ---------- ground: dark floor, light grid, glowing roads ---------- */
   const span = cityEnd - minX + 600;
   const midX = (minX + cityEnd) / 2;
@@ -230,44 +225,89 @@
   scene.add(ridgeLine);
 
   /* ---------- buildings ---------- */
+  // Futuristic tower body: an n-sided prism with one height segment per floor, base at y=0,
+  // bent so it narrows towards the top (taper) and turns about its axis (twist).
+  function towerGeo(apothem, h, floors, sides, taper, twist, turn0) {
+    const R = apothem / Math.cos(Math.PI / sides);
+    const geo = new THREE.CylinderGeometry(R, R, h, sides, Math.max(1, floors), false, Math.PI / sides);
+    const p = geo.attributes.position;
+    for (let i = 0; i < p.count; i++) {
+      const t = (p.getY(i) + h / 2) / h;
+      const k = lerp(1, taper, t), a = (turn0 || 0) + twist * t;
+      const x = p.getX(i) * k, z = p.getZ(i) * k;
+      p.setXYZ(i, x * Math.cos(a) + z * Math.sin(a), t * h, -x * Math.sin(a) + z * Math.cos(a));
+    }
+    geo.computeVertexNormals();
+    return geo;
+  }
+  function towerMats(tint, apothem, sides, floors) {
+    const face = 2 * apothem * Math.tan(Math.PI / sides);
+    const t = facadeTexture(tint);
+    t.repeat.set((sides * Math.max(1, Math.round(face / 2.2))) / 4, floors);
+    return [new THREE.MeshBasicMaterial({ map: t }), roofMat, roofMat];
+  }
+  const bandMats = {};
+  const bandMat = (c) => bandMats[c] || (bandMats[c] = new THREE.MeshBasicMaterial({ color: c, opacity: 0.9, ...add }));
+  function polyPts(R, sides, y) {
+    const out = [];
+    for (let k = 0; k < sides; k++) {
+      const a = Math.PI / sides + (k / sides) * Math.PI * 2, b = Math.PI / sides + ((k + 1) / sides) * Math.PI * 2;
+      out.push(R * Math.sin(a), y, R * Math.cos(a), R * Math.sin(b), y, R * Math.cos(b));
+    }
+    return out;
+  }
+  // a tilted glowing ring that slowly spins round the tower
+  const spinners = [];
+  function halo(parent, radius, y, tint, tilt, speed) {
+    const pivot = new THREE.Group();
+    pivot.position.y = y;
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.08, 6, 72), bandMat(tint));
+    ring.rotation.x = Math.PI / 2 + tilt;
+    pivot.add(ring);
+    parent.add(pivot);
+    spinners.push({ o: pivot, speed });
+  }
+  // antenna / spire with a blinking beacon on top; returns the beacon
+  function needle(parent, h, y, tint, base) {
+    const n = new THREE.Mesh(new THREE.CylinderGeometry(0.06, base, h, 6),
+      new THREE.MeshBasicMaterial({ color: tint, opacity: 0.9, ...add }));
+    n.position.y = y + h / 2;
+    parent.add(n);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 1, ...add }));
+    b.position.y = y + h;
+    parent.add(b);
+    return b;
+  }
   const pickables = [];
   function addBuilding(l) {
-    const h = l.floors * FLOOR_H;
+    const h = l.floors * FLOOR_H, sides = l.style.sides, a = l.w / 2;
+    const R = a / Math.cos(Math.PI / sides);
     l.group = new THREE.Group();
     l.group.position.set(l.x, 0, l.z);
     scene.add(l.group);
-    // footprint pad
-    l.group.add(lines(rectPts(l.w / 2 + 0.8, l.d / 2 + 0.8, 0.04), lineMat[l.tint]));
+    l.group.add(lines(polyPts(R + 0.9, sides, 0.04), lineMat[l.tint]));     // footprint pad
     if (h > 0) {
-      const geo = new THREE.BoxGeometry(l.w, h, l.d);
-      const sideX = facadeMat(l.tint, l.d, l.floors);
-      const sideZ = facadeMat(l.tint, l.w, l.floors);
-      const mesh = new THREE.Mesh(geo, [sideX, sideX, roofMat, roofMat, sideZ, sideZ]);
-      mesh.position.y = h / 2;
+      if (l.podium) {                                                      // wider setback base
+        const pg = towerGeo(a + 1.1, 1.4, 1, sides, 0.92, 0, 0);
+        l.group.add(new THREE.Mesh(pg, towerMats(l.tint, a + 1.1, sides, 1)));
+        l.group.add(new THREE.LineSegments(new THREE.EdgesGeometry(pg, 20), lineMat[l.tint]));
+      }
+      const geo = towerGeo(a, h, l.floors, sides, l.taper, l.twist, 0);
+      const mesh = new THREE.Mesh(geo, towerMats(l.tint, a, sides, l.floors));
       mesh.userData.lot = l;
       l.group.add(mesh);
       pickables.push(mesh);
-      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), lineMat[l.tint]);
-      edges.position.y = h / 2;
-      l.group.add(edges);
-      const glow = new THREE.Mesh(new THREE.BoxGeometry(l.w + 1.2, h + 0.6, l.d + 1.2), glowMat[l.tint]);
-      glow.position.y = h / 2;
-      l.group.add(glow);
+      l.group.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), lineMat[l.tint]));
+      l.group.add(new THREE.Mesh(towerGeo(a + 0.6, h + 0.4, 1, sides, l.taper, l.twist, 0), glowMat[l.tint]));
+      // glowing crown band just under the roof
+      const topA = a * l.taper;
+      const band = new THREE.Mesh(towerGeo(topA + 0.12, 0.3, 1, sides, 1, 0, l.twist), bandMat(l.tint));
+      band.position.y = h - 0.5;
+      l.group.add(band);
+      if (l.halo) halo(l.group, topA / Math.cos(Math.PI / sides) + 1.5, h - 1.4, l.tint, 0.2, 0.4 + (l.index % 3) * 0.2);
+      if (l.antennaH) l.beacon = needle(l.group, l.antennaH, h, l.tint, 0.22);
     }
-    if (l.extra > 0) {
-      const sh = spireH(l);
-      const base = h + slotH(l);
-      const spire = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.12, 0.5, sh, 6),
-        new THREE.MeshBasicMaterial({ color: l.tint, opacity: 0.9, ...add }));
-      spire.position.y = base + sh / 2;
-      l.group.add(spire);
-      const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.55, 10, 8),
-        new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 1, ...add }));
-      beacon.position.y = base + sh;
-      l.group.add(beacon);
-      l.beacon = beacon;
-    }
+    if (l.extra > 0) l.beacon = needle(l.group, spireH(l), h + slotH(l), l.tint, 0.5);
     // invisible pick box so short towers and spires are easy to click
     const pick = new THREE.Mesh(new THREE.BoxGeometry(l.w + 1, Math.max(topOf(l), 3), l.d + 1),
       new THREE.MeshBasicMaterial({ visible: false }));
@@ -276,13 +316,10 @@
     l.group.add(pick);
     pickables.push(pick);
   }
-  function rectPts(hw, hd, y) {
-    return [-hw, y, -hd, hw, y, -hd, hw, y, -hd, hw, y, hd, hw, y, hd, -hw, y, hd, -hw, y, hd, -hw, y, -hd];
-  }
   lots.forEach(addBuilding);
   if (empty) addBuilding(active);
 
-  /* ---------- the Hugging Face tower ---------- */
+  /* ---------- the Hugging Face megastructure ---------- */
   const hfTower = { hfTower: true, x: HF_X, z: 0 };
   const hfTiers = [];
   const searchlights = [];
@@ -292,75 +329,68 @@
     g.position.set(HF_X, 0, 0);
     scene.add(g);
     const gold = lineMat[GOLD];
-    const addBox = (w, h, y, mat, lot) => {
-      const geo = new THREE.BoxGeometry(w, h, w);
-      const m = new THREE.Mesh(geo, mat);
-      m.position.y = y + h / 2;
+    const part = (geo, apo, sides, floors, y, lot) => {
+      const m = new THREE.Mesh(geo, towerMats(GOLD, apo, sides, floors));
+      m.position.y = y;
       g.add(m);
-      const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), gold);
-      e.position.y = y + h / 2;
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), gold);
+      e.position.y = y;
       g.add(e);
       if (lot) { m.userData.lot = lot; pickables.push(m); }
     };
-    const facade = (w, floors) => { const f = decoMat(w, floors); return [f, f, roofMat, roofMat, f, f]; };
-    const ledgeMat = new THREE.MeshBasicMaterial({ color: GOLD, opacity: 0.75, ...add });
-    const ledge = (w, y) => {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(w + 0.8, 0.3, w + 0.8), ledgeMat);
+    const ring = (radius, y, tube) => {
+      const m = new THREE.Mesh(new THREE.TorusGeometry(radius, tube, 8, 96), bandMat(GOLD));
+      m.rotation.x = Math.PI / 2;
       m.position.y = y;
       g.add(m);
     };
 
-    // plaza: gold outline, a ring round the tower, and a path from the streets
+    // plaza: gold outline, a hex ring round the base, and a path from the streets
     const pl = PLAZA_X0 - HF_X + 2, pr = 24;
     const plaza = [pl, 0.03, -14.5, pr, 0.03, -14.5, pr, 0.03, -14.5, pr, 0.03, 14.5,
-      pr, 0.03, 14.5, pl, 0.03, 14.5, pl, 0.03, 14.5, pl, 0.03, -14.5];
-    for (let k = 0; k < 64; k++) {
-      const a = (k / 64) * Math.PI * 2, b = ((k + 1) / 64) * Math.PI * 2;
-      plaza.push(Math.cos(a) * 14.5, 0.03, Math.sin(a) * 14.5, Math.cos(b) * 14.5, 0.03, Math.sin(b) * 14.5);
-    }
-    for (const z of [-2, 2]) plaza.push(pl, 0.03, z, -14.5, 0.03, z);
+      pr, 0.03, 14.5, pl, 0.03, 14.5, pl, 0.03, 14.5, pl, 0.03, -14.5, ...polyPts(14.2 / Math.cos(Math.PI / 6), 6, 0.03)];
+    for (const z of [-2, 2]) plaza.push(pl, 0.03, z, -15, 0.03, z);
     g.add(lines(plaza, new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.4 })));
 
-    // podium, then one setback tier per project
-    addBox(PODIUM_W, PODIUM_H, 0, facade(PODIUM_W, 2), hfTower);
-    ledge(PODIUM_W, PODIUM_H);
+    // sloped hex podium with a second step
+    part(towerGeo(13, 3, 2, 6, 0.86, 0, 0), 13, 6, 2, 0, hfTower);
+    part(towerGeo(10.4, 1.5, 1, 6, 0.95, 0, 0), 10.4, 6, 1, 3, hfTower);
+    ring(10.4 / Math.cos(Math.PI / 6) * 0.95 + 0.3, PODIUM_H, 0.14);
+
+    // one octagonal tier per project, each turned a little further, with a glowing ring
     const floors = Math.max(1, Math.round(TIER_H / 1.1));
+    const n = hfItems.length;
     hfItems.forEach((item, i) => {
-      const w = tierW(i), y = PODIUM_H + i * TIER_H;
-      const tier = { hf: item, index: i, x: HF_X, z: 0, w, y: y + TIER_H / 2 };
-      addBox(w, TIER_H, y, facade(w, floors), tier);
-      ledge(w, y + TIER_H);
+      const apo = tierApo(i), y = PODIUM_H + i * TIER_H, turn = i * 0.22;
+      const r = (apo * 0.9) / Math.cos(Math.PI / 8) + 0.55;
+      const tier = { hf: item, index: i, x: HF_X, z: 0, w: apo * 2, y: y + TIER_H / 2, r };
+      part(towerGeo(apo, TIER_H - 0.25, floors, 8, 0.9, 0.08, turn), apo, 8, floors, y, tier);
+      ring(r, y + TIER_H - 0.12, 0.12);
       hfTiers.push(tier);
     });
-    const glow = new THREE.Mesh(new THREE.BoxGeometry(PODIUM_W + 2, tierTop + 1, PODIUM_W + 2), glowMat[GOLD]);
-    glow.position.y = tierTop / 2;
-    g.add(glow);
+    g.add(new THREE.Mesh(towerGeo(10.5, tierTop + 1, 1, 8, 0.5, 0, 0), glowMat[GOLD]));
 
-    // stepped crown with sunburst chevrons on every face, then the spire
-    const chev = [];
-    let y = tierTop;
-    for (const w of CROWN) {
-      addBox(w, CROWN_H, y, facade(w, 1), hfTower);
-      const hw0 = w / 2 + 0.02;
-      for (const f of [0.95, 0.6, 0.3]) {
-        const hw = (w / 2) * f, yb = y + 0.2, yt = yb + CROWN_H * f * 0.85;
-        for (const sg of [1, -1]) {
-          chev.push(-hw, yb, sg * hw0, 0, yt, sg * hw0, 0, yt, sg * hw0, hw, yb, sg * hw0);   // z faces
-          chev.push(sg * hw0, yb, -hw, sg * hw0, yt, 0, sg * hw0, yt, 0, sg * hw0, yb, hw);   // x faces
-        }
-      }
-      y += CROWN_H;
+    // neon struts from the podium to the core
+    const strutMat = new THREE.MeshBasicMaterial({ color: GOLD, opacity: 0.55, ...add });
+    const midY = PODIUM_H + tierTop * 0.5, midR = tierApo(Math.floor(n / 2)) * 0.95;
+    for (let k = 0; k < 6; k++) {
+      const ang = (k / 6) * Math.PI * 2;
+      const a = new THREE.Vector3(Math.sin(ang) * 11.5, 3, Math.cos(ang) * 11.5);
+      const b = new THREE.Vector3(Math.sin(ang) * midR, midY, Math.cos(ang) * midR);
+      const dir = new THREE.Vector3().subVectors(b, a);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, dir.length(), 6), strutMat);
+      m.position.copy(a).addScaledVector(dir, 0.5);
+      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+      g.add(m);
     }
-    g.add(lines(chev, new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.85 })));
-    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.7, HF_SPIRE, 8),
-      new THREE.MeshBasicMaterial({ color: GOLD, opacity: 0.95, ...add }));
-    spire.position.y = y + HF_SPIRE / 2;
-    g.add(spire);
-    hfBeacon = new THREE.Mesh(new THREE.SphereGeometry(0.7, 12, 8),
-      new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 1, ...add }));
-    hfBeacon.position.y = y + HF_SPIRE;
-    g.add(hfBeacon);
-    const crownPick = new THREE.Mesh(new THREE.BoxGeometry(8, hfTop - tierTop, 8), new THREE.MeshBasicMaterial({ visible: false }));
+
+    // crown: a twisting octagonal cap, three spinning halos, and the needle spire
+    part(towerGeo(3.6, CROWN_H, 3, 8, 0.35, Math.PI / 4, n * 0.22), 3.6, 8, 3, tierTop, hfTower);
+    halo(g, 6.4, tierTop + 1.2, GOLD, 0.12, 0.6);
+    halo(g, 5.0, tierTop + 3.4, GOLD, -0.18, -0.9);
+    halo(g, 3.6, tierTop + 5.6, GOLD, 0.26, 1.3);
+    hfBeacon = needle(g, HF_SPIRE, tierTop + CROWN_H, GOLD, 0.6);
+    const crownPick = new THREE.Mesh(new THREE.BoxGeometry(9, hfTop - tierTop, 9), new THREE.MeshBasicMaterial({ visible: false }));
     crownPick.position.y = tierTop + (hfTop - tierTop) / 2;
     crownPick.userData.lot = hfTower;
     g.add(crownPick);
@@ -369,10 +399,10 @@
     // two searchlights sweeping the sky from the podium
     if (!reduceMotion) {
       const beamGeo = new THREE.ConeGeometry(4, 120, 24, 1, true);
-      beamGeo.translate(0, -55, 0);
+      beamGeo.translate(0, -60, 0);
       beamGeo.rotateX(Math.PI);                     // apex at the lamp, wide end up
       const beamMat = new THREE.MeshBasicMaterial({ color: GOLD, opacity: 0.028, side: THREE.DoubleSide, ...add, fog: false });
-      for (const [bx, bz, ph] of [[-11, 11, 0], [11, 11, 2.4]]) {
+      for (const [bx, bz, ph] of [[-10, 8, 0], [10, 8, 2.4]]) {
         const pivot = new THREE.Group();
         pivot.position.set(bx, PODIUM_H + 0.3, bz);
         const beam = new THREE.Mesh(beamGeo, beamMat);
@@ -444,7 +474,8 @@
     head.add(hook);
 
     // the floor being lifted, and its copy once it lands
-    const slabGeo = new THREE.BoxGeometry(l.w, FLOOR_H, l.d);
+    const slabGeo = towerGeo((l.w / 2) * l.taper, FLOOR_H, 1, l.style.sides, 1, 0, l.twist);
+    slabGeo.translate(0, -FLOOR_H / 2, 0);
     const slabMat = new THREE.MeshBasicMaterial({ color: ORANGE, opacity: 0.35, ...add });
     const slab = new THREE.Group();
     slab.add(new THREE.Mesh(slabGeo, slabMat));
@@ -492,7 +523,7 @@
     c.hook.position.set(c.reach, hookY, 0);
     c.slab.visible = carrying;
     c.slab.position.set(c.reach, rel(y), 0);
-    c.slab.rotation.y = c.angB - ang;         // stays square to the tower when it lands
+    c.slab.rotation.y = -ang;                 // keeps its heading, so it lands square on the tower
     c.slabMat.opacity = s < 0.6 ? 0.35 * (s / 0.6) : 0.35;
     c.landedMat.opacity = landedA;
     c.slotMat.opacity = 0.45 + 0.4 * Math.abs(Math.sin(t * 2.2));
@@ -587,7 +618,7 @@
       t.gate = () => hfNear > 0.93;
       hfLabel(t, "is-side", `<span class="city-label-name">${esc(t.hf.name)}</span>` +
         `<span class="city-label-count">${esc(t.hf.task || t.hf.type)}</span>`,
-        new THREE.Vector3(HF_X + t.w / 2, t.y, t.w / 2));
+        new THREE.Vector3(HF_X + t.r * Math.cos(YAW), t.y, -t.r * Math.sin(YAW)));
     }
   }
   // show labels by priority (selected, crane, nearest first); hide any that overlap one already shown
@@ -803,6 +834,7 @@
     for (const l of lots) if (l.beacon) l.beacon.material.opacity = 0.35 + 0.65 * Math.abs(Math.sin(clock * 1.6 + l.index));
     if (hfBeacon) hfBeacon.material.opacity = 0.4 + 0.6 * Math.abs(Math.sin(clock * 1.1));
     for (const sl of searchlights) sl.pivot.rotation.y = clock * 0.35 + sl.ph;
+    if (!reduceMotion) for (const sp of spinners) sp.o.rotation.y += sp.speed * dt;
     renderer.render(scene, camera);
     updateLabels(stage.clientWidth, stage.clientHeight);
 

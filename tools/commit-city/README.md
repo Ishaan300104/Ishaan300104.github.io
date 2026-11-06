@@ -4,7 +4,7 @@
 It writes `data/city.js`. `js/city.js` draws one tower per repo and one floor per commit.
 
 It also lists the public Hugging Face models, datasets and Spaces of `NotIshaan`
-(no token needed). Each one becomes a tier of the gold Art Deco tower, oldest at the bottom.
+(no token needed). Each one becomes a tier of the gold Hugging Face megastructure, oldest at the bottom.
 Only the name, type, task and dates are kept, so likes and downloads never trigger a commit.
 If the Hugging Face API is down, the last list is kept.
 
