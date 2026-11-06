@@ -2,5 +2,290 @@
    Do not edit by hand. One entry = one building; commits = floors. */
 window.COMMIT_CITY = {
   "user": "Ishaan300104",
-  "repos": []
+  "repos": [
+    {
+      "id": "578264465",
+      "name": "Ishaan300104.github.io",
+      "url": "https://github.com/Ishaan300104/Ishaan300104.github.io",
+      "private": false,
+      "commits": 13,
+      "lastCommit": "2026-11-06T10:43:15Z",
+      "language": "JavaScript"
+    },
+    {
+      "id": "pad258825",
+      "name": null,
+      "private": true,
+      "commits": 1,
+      "lastCommit": "2026-07-07T11:34:46Z",
+      "language": null
+    },
+    {
+      "id": "paf96f590",
+      "name": null,
+      "private": true,
+      "commits": 19,
+      "lastCommit": "2026-06-24T16:08:40Z",
+      "language": null
+    },
+    {
+      "id": "p36a3449c",
+      "name": null,
+      "private": true,
+      "commits": 4,
+      "lastCommit": "2026-06-15T18:08:03Z",
+      "language": null
+    },
+    {
+      "id": "1093604726",
+      "name": "classical-ml-algorithms",
+      "url": "https://github.com/Ishaan300104/classical-ml-algorithms",
+      "private": false,
+      "commits": 4,
+      "lastCommit": "2026-06-14T13:38:56Z",
+      "language": "Python"
+    },
+    {
+      "id": "p74a92e4e",
+      "name": null,
+      "private": true,
+      "commits": 7,
+      "lastCommit": "2026-05-28T09:32:15Z",
+      "language": null
+    },
+    {
+      "id": "1191941709",
+      "name": "sahara",
+      "url": "https://github.com/Ishaan300104/sahara",
+      "private": false,
+      "commits": 6,
+      "lastCommit": "2026-04-21T07:20:27Z",
+      "language": "HTML"
+    },
+    {
+      "id": "1216154370",
+      "name": "speech-assignment-2",
+      "url": "https://github.com/Ishaan300104/speech-assignment-2",
+      "private": false,
+      "commits": 2,
+      "lastCommit": "2026-04-20T18:33:02Z",
+      "language": "Python"
+    },
+    {
+      "id": "1211350298",
+      "name": "speech-understanding-b22ci017-b22cs093-b22cs002",
+      "url": "https://github.com/Ishaan300104/speech-understanding-b22ci017-b22cs093-b22cs002",
+      "private": false,
+      "commits": 7,
+      "lastCommit": "2026-04-19T00:48:06Z",
+      "language": "Jupyter Notebook"
+    },
+    {
+      "id": "1198604249",
+      "name": "image-rag",
+      "url": "https://github.com/Ishaan300104/image-rag",
+      "private": false,
+      "commits": 3,
+      "lastCommit": "2026-04-03T18:57:50Z",
+      "language": "Python"
+    },
+    {
+      "id": "p90abb8a2",
+      "name": null,
+      "private": true,
+      "commits": 2,
+      "lastCommit": "2026-03-27T17:40:36Z",
+      "language": null
+    },
+    {
+      "id": "pbd17b80c",
+      "name": null,
+      "private": true,
+      "commits": 5,
+      "lastCommit": "2026-02-05T10:00:54Z",
+      "language": null
+    },
+    {
+      "id": "pf62635e4",
+      "name": null,
+      "private": true,
+      "commits": 6,
+      "lastCommit": "2026-01-13T19:37:24Z",
+      "language": null
+    },
+    {
+      "id": "p6c420870",
+      "name": null,
+      "private": true,
+      "commits": 1,
+      "lastCommit": "2026-01-06T16:51:27Z",
+      "language": null
+    },
+    {
+      "id": "pfa1722a6",
+      "name": null,
+      "private": true,
+      "commits": 1,
+      "lastCommit": "2026-01-02T19:31:17Z",
+      "language": null
+    },
+    {
+      "id": "1121633465",
+      "name": "ernie-challenge-warmup",
+      "url": "https://github.com/Ishaan300104/ernie-challenge-warmup",
+      "private": false,
+      "commits": 7,
+      "lastCommit": "2025-12-23T11:52:48Z",
+      "language": "HTML"
+    },
+    {
+      "id": "p697358ae",
+      "name": null,
+      "private": true,
+      "commits": 1,
+      "lastCommit": "2025-12-15T12:10:45Z",
+      "language": null
+    },
+    {
+      "id": "1093053402",
+      "name": "multi-agent-reviewer",
+      "url": "https://github.com/Ishaan300104/multi-agent-reviewer",
+      "private": false,
+      "commits": 9,
+      "lastCommit": "2025-11-25T17:32:59Z",
+      "language": "Python"
+    },
+    {
+      "id": "1095967416",
+      "name": "BTP",
+      "url": "https://github.com/Ishaan300104/BTP",
+      "private": false,
+      "commits": 1,
+      "lastCommit": "2025-11-18T10:20:06Z",
+      "language": "Python"
+    },
+    {
+      "id": "1096345946",
+      "name": "slm-tool-calling-2",
+      "url": "https://github.com/Ishaan300104/slm-tool-calling-2",
+      "private": false,
+      "commits": 8,
+      "lastCommit": "2025-11-14T12:17:35Z",
+      "language": "Python"
+    },
+    {
+      "id": "1016901631",
+      "name": "DLSS-SRCNN",
+      "url": "https://github.com/Ishaan300104/DLSS-SRCNN",
+      "private": false,
+      "commits": 5,
+      "lastCommit": "2025-11-10T12:47:25Z",
+      "language": "Python"
+    },
+    {
+      "id": "pddb0d5e4",
+      "name": null,
+      "private": true,
+      "commits": 1,
+      "lastCommit": "2025-11-08T17:23:12Z",
+      "language": null
+    },
+    {
+      "id": "p1be5833b",
+      "name": null,
+      "private": true,
+      "commits": 1,
+      "lastCommit": "2025-11-08T16:42:22Z",
+      "language": null
+    },
+    {
+      "id": "1082744333",
+      "name": "seq2seq-transformer-torch",
+      "url": "https://github.com/Ishaan300104/seq2seq-transformer-torch",
+      "private": false,
+      "commits": 6,
+      "lastCommit": "2025-10-30T19:12:58Z",
+      "language": "Python"
+    },
+    {
+      "id": "p61c47b2a",
+      "name": null,
+      "private": true,
+      "commits": 3,
+      "lastCommit": "2025-10-10T17:55:23Z",
+      "language": null
+    },
+    {
+      "id": "908847362",
+      "name": "ML-for-Predicting-Properties-of-Porous-Media-from-2D-X-ray-Images",
+      "url": "https://github.com/Ishaan300104/ML-for-Predicting-Properties-of-Porous-Media-from-2D-X-ray-Images",
+      "private": false,
+      "commits": 5,
+      "lastCommit": "2025-01-12T07:39:03Z",
+      "language": "Python"
+    },
+    {
+      "id": "867698616",
+      "name": "OdeGPT",
+      "url": "https://github.com/Ishaan300104/OdeGPT",
+      "private": false,
+      "commits": 2,
+      "lastCommit": "2024-10-14T09:38:38Z",
+      "language": "Jupyter Notebook"
+    },
+    {
+      "id": "871846453",
+      "name": "Vision-Proctor",
+      "url": "https://github.com/Ishaan300104/Vision-Proctor",
+      "private": false,
+      "commits": 13,
+      "lastCommit": "2024-10-13T15:25:33Z",
+      "language": "Jupyter Notebook"
+    },
+    {
+      "id": "870739595",
+      "name": "Research-Papers",
+      "url": "https://github.com/Ishaan300104/Research-Papers",
+      "private": false,
+      "commits": 7,
+      "lastCommit": "2024-10-11T15:48:50Z",
+      "language": null
+    },
+    {
+      "id": "849777013",
+      "name": "streamlit-cheat-sheet",
+      "url": "https://github.com/Ishaan300104/streamlit-cheat-sheet",
+      "private": false,
+      "commits": 1,
+      "lastCommit": "2024-08-30T08:19:19Z",
+      "language": "Python"
+    },
+    {
+      "id": "833286990",
+      "name": "Vehicle-Health-Estimation-using-ML",
+      "url": "https://github.com/Ishaan300104/Vehicle-Health-Estimation-using-ML",
+      "private": false,
+      "commits": 1,
+      "lastCommit": "2024-07-24T18:17:00Z",
+      "language": null
+    },
+    {
+      "id": "715495870",
+      "name": "Alzheimers-detection-project",
+      "url": "https://github.com/Ishaan300104/Alzheimers-detection-project",
+      "private": false,
+      "commits": 3,
+      "lastCommit": "2023-12-27T08:21:54Z",
+      "language": "Jupyter Notebook"
+    },
+    {
+      "id": "691202307",
+      "name": "FRAIL",
+      "url": "https://github.com/Ishaan300104/FRAIL",
+      "private": false,
+      "commits": 20,
+      "lastCommit": "2023-09-19T18:14:59Z",
+      "language": "Jupyter Notebook"
+    }
+  ]
 };
