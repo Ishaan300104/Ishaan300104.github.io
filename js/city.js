@@ -27,6 +27,12 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const stage = canvas.parentElement;
+  // Layout set here, not only in CSS: if a stale stylesheet is cached, the canvas
+  // must still not size the stage, or each resize would grow it again.
+  if (getComputedStyle(stage).position === "static") stage.style.position = "relative";
+  stage.style.overflow = "hidden";
+  Object.assign(canvas.style, { position: "absolute", left: "0", top: "0", width: "100%", height: "100%", display: "block" });
+  if (stage.clientHeight < 200 || stage.clientHeight > 1200) stage.style.height = "520px";
   const labelLayer = stage.querySelector(".city-labels");
   const card = stage.querySelector(".city-card");
   const badge = stage.querySelector(".city-badge");
@@ -421,7 +427,7 @@
     const shown = [];
     for (const l of cand) {
       if (!l.lw) { l.label.style.display = ""; l.lw = l.label.offsetWidth; l.lh = l.label.offsetHeight; }
-      l.sy = Math.max(l.sy, l.lh + 6);           // keep the label inside the stage
+      l.sy = Math.max(l.sy, l.lh + 30);           // keep the label inside the stage
       l.sx = clamp(l.sx, l.lw / 2 + 4, w - l.lw / 2 - 4);
       const r = { x0: l.sx - l.lw / 2 - 2, x1: l.sx + l.lw / 2 + 2, y0: l.sy - l.lh - 2, y1: l.sy + 2 };
       const clash = shown.some((s) => r.x0 < s.x1 && r.x1 > s.x0 && r.y0 < s.y1 && r.y1 > s.y0);

@@ -52,7 +52,7 @@ portfolio-website/
 ### `index.html` — the content
 - `index.html` is a special name: web servers automatically show it as the homepage.
 - It is divided into `<section>` blocks, one per part of the page:
-  `#hero` (big intro), `#about`, `#skills`, `#experience`, `#projects`,
+  `#hero` (big intro, with Commit City on the right), `#about`, `#skills`, `#experience`, `#projects`,
   `#techstack`, `#contact`.
 - The navigation bar links like `href="#projects"` simply scroll to the section
   with `id="projects"` — that's how one-page sites navigate.
