@@ -4,6 +4,8 @@
    Data: data/city.js, refreshed every 6 hours by
    .github/workflows/commit-city.yml (tools/commit-city/build.js).
    A crane builds the next floor on the repo I committed to last.
+   Past a plaza at the right end, an Art Deco tower holds my
+   Hugging Face projects: one setback tier per project.
    Built with Three.js (r128 UMD build, loaded in index.html).
    ========================================================= */
 
@@ -85,6 +87,25 @@
   const topOf = (l) => l.floors * FLOOR_H + slotH(l) + spireH(l);
   const maxTop = Math.max(14, ...lots.map(topOf), topOf(active) + 12);
 
+  /* ---------- Hugging Face district: one Art Deco tower, one tier per project ---------- */
+  const GOLD = 0xffc94d;
+  const hfItems = ((window.COMMIT_CITY && window.COMMIT_CITY.hf) || [])
+    .filter((x) => x && x.id)
+    .slice()
+    .sort((a, b) => String(a.created).localeCompare(String(b.created)));   // oldest at the bottom
+  const hfUser = (window.COMMIT_CITY && window.COMMIT_CITY.hfUser) || "";
+  const HF_ON = hfItems.length > 0;
+  const PLAZA_X0 = maxX + LOT / 2 + ROAD;    // where the GitHub streets end
+  const HF_X = PLAZA_X0 + 34;                 // tower centre
+  const PODIUM_W = 26, PODIUM_H = 4;
+  const TIER_H = clamp(40 / Math.max(1, hfItems.length), 2.4, 5.5);
+  const tierW = (i) => lerp(20, 7.5, hfItems.length > 1 ? i / (hfItems.length - 1) : 0);
+  const tierTop = PODIUM_H + hfItems.length * TIER_H;
+  const CROWN = [6.5, 5, 3.5], CROWN_H = 2.4, HF_SPIRE = 16;
+  const hfTop = HF_ON ? tierTop + CROWN.length * CROWN_H + HF_SPIRE : 0;
+  const panMax = HF_ON ? HF_X : maxX;
+  const cityEnd = HF_ON ? HF_X + 30 : maxX;
+
   /* ---------- renderer, scene, camera ---------- */
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -92,15 +113,20 @@
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(FOV, 2, 1, 2000);
   const DIST = clamp(maxTop * 2.5, 120, 240);
+  const DIST_HF = clamp(hfTop * 2.3, DIST, 280);   // the camera pulls back near the HF tower
+  let dist = DIST, hfNear = 0;
   scene.fog = new THREE.Fog(BG, DIST * 0.75, DIST * 2.3);
   const camTarget = new THREE.Vector3(maxX, maxTop * 0.4, 0);
-  let panX = maxX, panGoal = maxX, panVel = 0;
+
+  // first view: the crane, and the Hugging Face tower beside it when there is one
+  const START_X = HF_ON ? lerp(maxX, HF_X, 0.55) : maxX;
+  let panX = START_X, panGoal = START_X, panVel = 0;
 
   /* ---------- shared materials ---------- */
   const add = { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false };
   const lineMat = {};
   const glowMat = {};
-  for (const c of [CYAN, PURPLE, ORANGE]) {
+  for (const c of [CYAN, PURPLE, ORANGE, GOLD]) {
     lineMat[c] = new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: 0.95 });
     glowMat[c] = new THREE.MeshBasicMaterial({ color: c, opacity: 0.07, side: THREE.BackSide, ...add });
   }
@@ -135,9 +161,31 @@
     return new THREE.MeshBasicMaterial({ map: t });
   }
 
+  // Art Deco facade: gold piers with tall narrow windows between them
+  let decoCanvas = null;
+  function decoMat(width, floors) {
+    if (!decoCanvas) {
+      decoCanvas = document.createElement("canvas");
+      decoCanvas.width = 64; decoCanvas.height = 32;
+      const g = decoCanvas.getContext("2d");
+      g.fillStyle = "#07060a"; g.fillRect(0, 0, 64, 32);
+      g.fillStyle = "#ffc94d";
+      g.globalAlpha = 0.75; g.fillRect(0, 0, 2, 32);          // main pier
+      g.globalAlpha = 0.3; g.fillRect(31, 0, 1, 32);          // minor pier
+      g.globalAlpha = 0.2; g.fillRect(0, 30, 64, 2);          // floor line
+      g.globalAlpha = 0.42; g.fillRect(12, 6, 10, 20);        // tall narrow windows
+      g.globalAlpha = 0.16; g.fillRect(43, 6, 10, 20);
+    }
+    const t = new THREE.CanvasTexture(decoCanvas);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    t.repeat.set(Math.max(1, Math.round(width / 3)) / 2, floors);
+    return new THREE.MeshBasicMaterial({ map: t });
+  }
+
   /* ---------- ground: dark floor, light grid, glowing roads ---------- */
-  const span = maxX - minX + 600;
-  const midX = (minX + maxX) / 2;
+  const span = cityEnd - minX + 600;
+  const midX = (minX + cityEnd) / 2;
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(span, 600), new THREE.MeshBasicMaterial({ color: 0x04070f }));
   ground.rotation.x = -Math.PI / 2;
   ground.position.set(midX, -0.05, 0);
@@ -155,10 +203,13 @@
     return new THREE.LineSegments(g, mat);
   }
   const roadPts = [];
-  const x0 = minX - 300, x1 = maxX + 300;
-  for (const z of [16, 22, -16, -22, -3.6, 3.6]) roadPts.push(x0, 0.02, z, x1, 0.02, z);
+  const x0 = minX - 300, x1 = cityEnd + 300;
+  const streetsEnd = HF_ON ? PLAZA_X0 : x1;   // the alley and cross streets stop at the plaza
+  for (const z of [16, 22, -16, -22]) roadPts.push(x0, 0.02, z, x1, 0.02, z);
+  for (const z of [-3.6, 3.6]) roadPts.push(x0, 0.02, z, streetsEnd, 0.02, z);
   for (let c = BLOCK; c <= Math.floor(maxX / LOT) + BLOCK * 2; c += BLOCK) {
     const xr = colX(c) - LOT / 2 - ROAD / 2;
+    if (xr > streetsEnd - ROAD) break;
     for (const dx of [-ROAD / 2 + 0.6, ROAD / 2 - 0.6]) roadPts.push(xr + dx, 0.02, -22, xr + dx, 0.02, 22);
   }
   scene.add(lines(roadPts, new THREE.LineBasicMaterial({ color: CYAN, transparent: true, opacity: 0.45 })));
@@ -230,6 +281,108 @@
   }
   lots.forEach(addBuilding);
   if (empty) addBuilding(active);
+
+  /* ---------- the Hugging Face tower ---------- */
+  const hfTower = { hfTower: true, x: HF_X, z: 0 };
+  const hfTiers = [];
+  const searchlights = [];
+  let hfBeacon = null;
+  if (HF_ON) (function buildHF() {
+    const g = new THREE.Group();
+    g.position.set(HF_X, 0, 0);
+    scene.add(g);
+    const gold = lineMat[GOLD];
+    const addBox = (w, h, y, mat, lot) => {
+      const geo = new THREE.BoxGeometry(w, h, w);
+      const m = new THREE.Mesh(geo, mat);
+      m.position.y = y + h / 2;
+      g.add(m);
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), gold);
+      e.position.y = y + h / 2;
+      g.add(e);
+      if (lot) { m.userData.lot = lot; pickables.push(m); }
+    };
+    const facade = (w, floors) => { const f = decoMat(w, floors); return [f, f, roofMat, roofMat, f, f]; };
+    const ledgeMat = new THREE.MeshBasicMaterial({ color: GOLD, opacity: 0.75, ...add });
+    const ledge = (w, y) => {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w + 0.8, 0.3, w + 0.8), ledgeMat);
+      m.position.y = y;
+      g.add(m);
+    };
+
+    // plaza: gold outline, a ring round the tower, and a path from the streets
+    const pl = PLAZA_X0 - HF_X + 2, pr = 24;
+    const plaza = [pl, 0.03, -14.5, pr, 0.03, -14.5, pr, 0.03, -14.5, pr, 0.03, 14.5,
+      pr, 0.03, 14.5, pl, 0.03, 14.5, pl, 0.03, 14.5, pl, 0.03, -14.5];
+    for (let k = 0; k < 64; k++) {
+      const a = (k / 64) * Math.PI * 2, b = ((k + 1) / 64) * Math.PI * 2;
+      plaza.push(Math.cos(a) * 14.5, 0.03, Math.sin(a) * 14.5, Math.cos(b) * 14.5, 0.03, Math.sin(b) * 14.5);
+    }
+    for (const z of [-2, 2]) plaza.push(pl, 0.03, z, -14.5, 0.03, z);
+    g.add(lines(plaza, new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.4 })));
+
+    // podium, then one setback tier per project
+    addBox(PODIUM_W, PODIUM_H, 0, facade(PODIUM_W, 2), hfTower);
+    ledge(PODIUM_W, PODIUM_H);
+    const floors = Math.max(1, Math.round(TIER_H / 1.1));
+    hfItems.forEach((item, i) => {
+      const w = tierW(i), y = PODIUM_H + i * TIER_H;
+      const tier = { hf: item, index: i, x: HF_X, z: 0, w, y: y + TIER_H / 2 };
+      addBox(w, TIER_H, y, facade(w, floors), tier);
+      ledge(w, y + TIER_H);
+      hfTiers.push(tier);
+    });
+    const glow = new THREE.Mesh(new THREE.BoxGeometry(PODIUM_W + 2, tierTop + 1, PODIUM_W + 2), glowMat[GOLD]);
+    glow.position.y = tierTop / 2;
+    g.add(glow);
+
+    // stepped crown with sunburst chevrons on every face, then the spire
+    const chev = [];
+    let y = tierTop;
+    for (const w of CROWN) {
+      addBox(w, CROWN_H, y, facade(w, 1), hfTower);
+      const hw0 = w / 2 + 0.02;
+      for (const f of [0.95, 0.6, 0.3]) {
+        const hw = (w / 2) * f, yb = y + 0.2, yt = yb + CROWN_H * f * 0.85;
+        for (const sg of [1, -1]) {
+          chev.push(-hw, yb, sg * hw0, 0, yt, sg * hw0, 0, yt, sg * hw0, hw, yb, sg * hw0);   // z faces
+          chev.push(sg * hw0, yb, -hw, sg * hw0, yt, 0, sg * hw0, yt, 0, sg * hw0, yb, hw);   // x faces
+        }
+      }
+      y += CROWN_H;
+    }
+    g.add(lines(chev, new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.85 })));
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.7, HF_SPIRE, 8),
+      new THREE.MeshBasicMaterial({ color: GOLD, opacity: 0.95, ...add }));
+    spire.position.y = y + HF_SPIRE / 2;
+    g.add(spire);
+    hfBeacon = new THREE.Mesh(new THREE.SphereGeometry(0.7, 12, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 1, ...add }));
+    hfBeacon.position.y = y + HF_SPIRE;
+    g.add(hfBeacon);
+    const crownPick = new THREE.Mesh(new THREE.BoxGeometry(8, hfTop - tierTop, 8), new THREE.MeshBasicMaterial({ visible: false }));
+    crownPick.position.y = tierTop + (hfTop - tierTop) / 2;
+    crownPick.userData.lot = hfTower;
+    g.add(crownPick);
+    pickables.push(crownPick);
+
+    // two searchlights sweeping the sky from the podium
+    if (!reduceMotion) {
+      const beamGeo = new THREE.ConeGeometry(4, 120, 24, 1, true);
+      beamGeo.translate(0, -55, 0);
+      beamGeo.rotateX(Math.PI);                     // apex at the lamp, wide end up
+      const beamMat = new THREE.MeshBasicMaterial({ color: GOLD, opacity: 0.028, side: THREE.DoubleSide, ...add, fog: false });
+      for (const [bx, bz, ph] of [[-11, 11, 0], [11, 11, 2.4]]) {
+        const pivot = new THREE.Group();
+        pivot.position.set(bx, PODIUM_H + 0.3, bz);
+        const beam = new THREE.Mesh(beamGeo, beamMat);
+        beam.rotation.z = 0.34;
+        pivot.add(beam);
+        g.add(pivot);
+        searchlights.push({ pivot, ph });
+      }
+    }
+  })();
 
   /* ---------- the crane ---------- */
   function lattice(len, s, step) {
@@ -380,8 +533,9 @@
     });
   }
   function updateBikes(dt) {
-    const lo = Math.min(panX, minX) - 140, hi = Math.max(panX, maxX) + 140;
+    const lo = Math.min(panX, minX) - 140;
     for (const b of bikes) {
+      const hi = b.z === 0 && HF_ON ? PLAZA_X0 - 4 : Math.max(panX, panMax) + 140;
       b.x += b.dir * b.speed * dt;
       if (b.x > hi || b.x < lo) { b.x = b.dir > 0 ? lo : hi; b.hist.length = 0; }
       b.bike.position.set(b.x, 0.4, b.z);
@@ -397,8 +551,8 @@
   }
 
   /* ---------- labels ---------- */
-  const labeled = empty ? [] : lots;
-  for (const l of labeled) {
+  const labeled = [];
+  for (const l of empty ? [] : lots) {
     const el = document.createElement("button");
     el.type = "button";
     el.className = "city-label mono" + (l.repo.private ? " is-private" : "") + (l.active ? " is-active" : "");
@@ -409,6 +563,32 @@
     labelLayer.appendChild(el);
     l.label = el;
     l.anchor = new THREE.Vector3(l.x, topOf(l) + 1.5, l.z);
+    labeled.push(l);
+  }
+  function hfLabel(l, cls, html, anchor) {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "city-label mono is-hf " + cls;
+    el.innerHTML = html;
+    el.addEventListener("click", () => focusLot(l));
+    labelLayer.appendChild(el);
+    l.label = el;
+    l.anchor = anchor;
+    labeled.push(l);
+  }
+  if (HF_ON) {
+    hfLabel(hfTower, "is-hf-sign",
+      `<span class="city-label-tag">🤗 hugging face</span><span class="city-label-name">${esc(hfUser)}</span>` +
+      `<span class="city-label-count">${hfItems.length} project${hfItems.length === 1 ? "" : "s"}</span>`,
+      new THREE.Vector3(HF_X, hfTop + 2, 0));
+    // tier labels sit beside the tier corner that faces the camera, and only show up close
+    for (const t of hfTiers) {
+      t.side = true;
+      t.gate = () => hfNear > 0.93;
+      hfLabel(t, "is-side", `<span class="city-label-name">${esc(t.hf.name)}</span>` +
+        `<span class="city-label-count">${esc(t.hf.task || t.hf.type)}</span>`,
+        new THREE.Vector3(HF_X + t.w / 2, t.y, t.w / 2));
+    }
   }
   // show labels by priority (selected, crane, nearest first); hide any that overlap one already shown
   const v = new THREE.Vector3();
@@ -417,24 +597,30 @@
     const cand = [];
     for (const l of labeled) {
       v.copy(l.anchor).project(camera);
-      const on = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.2;
+      const on = v.z < 1 && v.x > -1.1 && v.x < 1.1 && v.y > -1.1 && v.y < 1.2 && (!l.gate || l.gate());
       if (!on) { l.label.style.display = "none"; continue; }
       l.sx = ((v.x + 1) / 2) * w; l.sy = ((1 - v.y) / 2) * h; l.depth = v.z;
       cand.push(l);
     }
-    const rank = (l) => (l === selected ? -3 : l.active ? -2 : l.depth);
+    const rank = (l) => (l === selected ? -4 : l.hfTower ? -3 : l.active ? -2 : l.depth);
     cand.sort((a, b) => rank(a) - rank(b));
     const shown = [];
     for (const l of cand) {
       if (!l.lw) { l.label.style.display = ""; l.lw = l.label.offsetWidth; l.lh = l.label.offsetHeight; }
-      l.sy = Math.max(l.sy, l.lh + 30);           // keep the label inside the stage
-      l.sx = clamp(l.sx, l.lw / 2 + 4, w - l.lw / 2 - 4);
-      const r = { x0: l.sx - l.lw / 2 - 2, x1: l.sx + l.lw / 2 + 2, y0: l.sy - l.lh - 2, y1: l.sy + 2 };
+      let r;
+      if (l.side) {                                // left edge at the anchor, centred on it
+        l.sx = Math.min(l.sx + 8, w - l.lw - 4);
+        r = { x0: l.sx - 2, x1: l.sx + l.lw + 2, y0: l.sy - l.lh / 2 - 1, y1: l.sy + l.lh / 2 + 1 };
+      } else {
+        l.sy = Math.max(l.sy, l.lh + 30);         // keep the label inside the stage
+        l.sx = clamp(l.sx, l.lw / 2 + 4, w - l.lw / 2 - 4);
+        r = { x0: l.sx - l.lw / 2 - 2, x1: l.sx + l.lw / 2 + 2, y0: l.sy - l.lh - 2, y1: l.sy + 2 };
+      }
       const clash = shown.some((s) => r.x0 < s.x1 && r.x1 > s.x0 && r.y0 < s.y1 && r.y1 > s.y0);
       l.label.style.display = clash ? "none" : "";
       if (clash) continue;
       shown.push(r);
-      l.label.style.transform = `translate(${l.sx}px, ${l.sy}px) translate(-50%, -100%)`;
+      l.label.style.transform = `translate(${l.sx}px, ${l.sy}px) ` + (l.side ? "translate(0, -50%)" : "translate(-50%, -100%)");
     }
   }
 
@@ -448,7 +634,35 @@
     const m = Math.round(d / 30);
     return m < 18 ? `${m} months ago` : `${(d / 365).toFixed(1)} years ago`;
   }
+  const hfUrl = (x) => "https://huggingface.co/" + (x.type === "dataset" ? "datasets/" : x.type === "space" ? "spaces/" : "") + x.id;
+  const month = (iso) => { const d = new Date(iso); return isNaN(d) ? "—" : d.toLocaleDateString("en", { month: "short", year: "numeric" }); };
+  function selectCard(l, html) {
+    card.innerHTML = html;
+    card.hidden = false;
+    selected = l;
+    for (const x of labeled) x.label.classList.toggle("is-selected", x === l);
+  }
   function showCard(l) {
+    if (l && l.hf) {
+      const x = l.hf;
+      return selectCard(l,
+        `<p class="city-card-kicker mono is-hf">🤗 tier ${l.index + 1} of ${hfItems.length}</p>` +
+        `<h3 class="city-card-title">${esc(x.name)}</h3>` +
+        `<dl class="city-card-stats mono"><dt>type</dt><dd>${esc(x.type)}</dd>` +
+        (x.task ? `<dt>task</dt><dd>${esc(x.task)}</dd>` : "") +
+        `<dt>published</dt><dd>${month(x.created)}</dd></dl>` +
+        `<a class="city-card-link" href="${esc(hfUrl(x))}" target="_blank" rel="noopener">view on Hugging Face →</a>`);
+    }
+    if (l && l.hfTower) {
+      const count = (t) => hfItems.filter((x) => x.type === t).length;
+      const rows = [["models", count("model")], ["datasets", count("dataset")], ["spaces", count("space")]]
+        .filter((r) => r[1]).map((r) => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join("");
+      return selectCard(l,
+        `<p class="city-card-kicker mono is-hf">🤗 hugging face tower</p>` +
+        `<h3 class="city-card-title">${esc(hfUser)}</h3>` +
+        `<dl class="city-card-stats mono"><dt>tiers</dt><dd>${hfItems.length}</dd>${rows}</dl>` +
+        `<a class="city-card-link" href="https://huggingface.co/${esc(hfUser)}" target="_blank" rel="noopener">view profile →</a>`);
+    }
     if (!l || !l.repo) { card.hidden = true; return; }
     const r = l.repo;
     const title = r.private ? "Private repo" : esc(r.name);
@@ -460,27 +674,26 @@
       `<dt>floors</dt><dd>${r.commits}${l.extra > 0 ? ` <span class="dim">(${MAX_FLOORS} + spire)</span>` : ""}</dd>` +
       (r.language ? `<dt>language</dt><dd>${esc(r.language)}</dd>` : "") +
       `<dt>last commit</dt><dd>${ago(r.lastCommit)}</dd></dl>` + link;
-    card.hidden = false;
-    selected = l;
-    for (const x of labeled) x.label.classList.toggle("is-selected", x === l);
+    selectCard(l, card.innerHTML);
   }
 
   const total = repos.reduce((s, r) => s + r.commits, 0);
-  hud.textContent = empty ? "" : `${repos.length} towers · ${total} floors · 1 floor = 1 commit`;
+  hud.textContent = (empty ? "" : `${repos.length} towers · ${total} floors · 1 floor = 1 commit`) +
+    (HF_ON ? `${empty ? "" : " · "}🤗 ${hfItems.length} HF projects →` : "");
   if (empty) badge.hidden = false;
-  showCard(active);
+  if (!HF_ON) showCard(active);             // with the HF tower in view, start with a clear skyline
 
   /* ---------- camera + panning ---------- */
   function focusLot(l) {
-    panGoal = clamp(l.x, minX, maxX);
+    panGoal = clamp(l.x, minX, panMax);
     panVel = 0;
     showCard(l);
     wake();
   }
   function worldPerPx() {
-    return (2 * DIST * Math.tan((FOV / 2) * Math.PI / 180)) / Math.max(1, stage.clientHeight) / Math.cos(YAW);
+    return (2 * dist * Math.tan((FOV / 2) * Math.PI / 180)) / Math.max(1, stage.clientHeight) / Math.cos(YAW);
   }
-  function panBy(dx) { panGoal = clamp(panGoal + dx, minX - LOT, maxX + LOT); wake(); }
+  function panBy(dx) { panGoal = clamp(panGoal + dx, minX - LOT, panMax + LOT); wake(); }
 
   let drag = null;
   canvas.addEventListener("pointerdown", (e) => {
@@ -525,6 +738,7 @@
     if (e.key === "ArrowLeft") { panBy(-LOT * 2); e.preventDefault(); }
     else if (e.key === "ArrowRight") { panBy(LOT * 2); e.preventDefault(); }
     else if (e.key === "End") { focusLot(active); e.preventDefault(); }
+    else if (e.key === "Home" && HF_ON) { focusLot(hfTower); e.preventDefault(); }
   });
 
   const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -535,8 +749,15 @@
     const h = ray.intersectObjects(pickables, false)[0];
     return h ? h.object.userData.lot : null;
   }
-  function pick(e) { const l = hit(e); if (l && l.repo) focusLot(l); }
-  function hover(e) { canvas.classList.toggle("is-pointing", !!(hit(e) || {}).repo); }
+  const clickable = (l) => !!(l && (l.repo || l.hf || l.hfTower));
+  function pick(e) {
+    const l = hit(e);
+    if (clickable(l)) return focusLot(l);
+    card.hidden = true;                       // click on empty ground closes the card
+    selected = null;
+    for (const x of labeled) x.label.classList.remove("is-selected");
+  }
+  function hover(e) { canvas.classList.toggle("is-pointing", clickable(hit(e))); }
 
   /* ---------- size, visibility, loop ---------- */
   function resize() {
@@ -557,22 +778,31 @@
     last = now;
     clock += dt;
     if (!drag) {
-      if (Math.abs(panVel) > 0.5) { panGoal = clamp(panGoal + panVel * dt, minX - LOT, maxX + LOT); panVel *= Math.pow(0.04, dt); }
+      if (Math.abs(panVel) > 0.5) { panGoal = clamp(panGoal + panVel * dt, minX - LOT, panMax + LOT); panVel *= Math.pow(0.04, dt); }
       else panVel = 0;
-      if (panGoal < minX || panGoal > maxX) panGoal = lerp(panGoal, clamp(panGoal, minX, maxX), 1 - Math.pow(0.002, dt));
+      if (panGoal < minX || panGoal > panMax) panGoal = lerp(panGoal, clamp(panGoal, minX, panMax), 1 - Math.pow(0.002, dt));
       panX = reduceMotion ? panGoal : lerp(panX, panGoal, 1 - Math.pow(0.0015, dt));
     }
+    hfNear = HF_ON ? ease(1 - Math.abs(panX - HF_X) / 95) : 0;
+    // narrow stages see less width, so pull back to keep the same stretch of street
+    const fit = Math.pow(Math.max(1, 1.7 / Math.max(0.5, camera.aspect)), 0.75);
+    dist = lerp(DIST, DIST_HF, hfNear) * fit;
+    scene.fog.near = dist * 0.75;
+    scene.fog.far = dist * 2.3;
     camTarget.x = panX;
+    camTarget.y = lerp(maxTop * 0.4, hfTop * 0.42, hfNear);
     camera.position.set(
-      camTarget.x + DIST * Math.cos(ELEV) * Math.sin(YAW),
-      camTarget.y + DIST * Math.sin(ELEV),
-      camTarget.z + DIST * Math.cos(ELEV) * Math.cos(YAW));
+      camTarget.x + dist * Math.cos(ELEV) * Math.sin(YAW),
+      camTarget.y + dist * Math.sin(ELEV),
+      camTarget.z + dist * Math.cos(ELEV) * Math.cos(YAW));
     camera.lookAt(camTarget);
     ridgeLine.position.x = panX * 0.6;        // slow parallax on the far ridge
 
     updateCrane(clock);
     updateBikes(dt);
     for (const l of lots) if (l.beacon) l.beacon.material.opacity = 0.35 + 0.65 * Math.abs(Math.sin(clock * 1.6 + l.index));
+    if (hfBeacon) hfBeacon.material.opacity = 0.4 + 0.6 * Math.abs(Math.sin(clock * 1.1));
+    for (const sl of searchlights) sl.pivot.rotation.y = clock * 0.35 + sl.ph;
     renderer.render(scene, camera);
     updateLabels(stage.clientWidth, stage.clientHeight);
 

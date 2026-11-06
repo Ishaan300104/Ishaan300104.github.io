@@ -491,6 +491,13 @@ body {
 .city-label.is-active .city-label-count,
 .city-label-tag { color: #ff9e3d; }
 .city-label.is-selected { background: rgba(102, 217, 255, 0.18); }
+.city-label.is-hf { border-color: rgba(255, 201, 77, 0.6); box-shadow: 0 0 12px rgba(255, 201, 77, 0.3); }
+.city-label.is-hf .city-label-count,
+.city-label.is-hf .city-label-tag { color: #ffc94d; }
+.city-label.is-hf.is-selected { background: rgba(255, 201, 77, 0.16); }
+.city-label.is-side { flex-direction: row; gap: 0.5rem; padding: 1px 6px; font-size: 0.62rem; }
+.city-label.is-side .city-label-count { opacity: 0.8; }
+.city-card-kicker.is-hf { color: #ffc94d; }
 
 .city-hud {
   position: absolute;
