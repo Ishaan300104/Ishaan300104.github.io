@@ -1,0 +1,40 @@
+name: Commit City data
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"   # every 6 hours
+  workflow_dispatch:         # "Run workflow" button
+
+permissions:
+  contents: write
+
+concurrency:
+  group: commit-city
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Count commits per repo
+        env:
+          CITY_TOKEN: ${{ secrets.CITY_TOKEN }}
+        run: node tools/commit-city/build.js
+
+      - name: Commit only if the counts changed
+        run: |
+          if git diff --quiet -- data/city.js; then
+            echo "No new commits. Nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/city.js
+          git commit -m "Update Commit City data"
+          git push

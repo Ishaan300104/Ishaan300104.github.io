@@ -36,12 +36,13 @@ portfolio-website/
 ├── js/
 │   ├── main.js     ← The 3D background, typing effect, scroll animations, tilt cards.
 │   ├── lab.js      ← The four "ML in Motion" interactive demos (see below).
-│   ├── globe.js    ← The "Where I Ship Code" commit globe.
-│   └── world-land.js ← A tiny map of where land is, used to draw the globe's dots.
+│   └── city.js     ← The "Commit City" 3D skyline (one tower per repo).
 ├── data/
-│   └── commits.js  ← Your commits for the globe (generated — don't edit by hand).
+│   └── city.js     ← Commit counts per repo (generated — don't edit by hand).
 ├── tools/
-│   └── commit-globe/ ← The git hook + command-line tool that fills data/commits.js.
+│   └── commit-city/ ← The script that fills data/city.js from GitHub.
+├── .github/
+│   └── workflows/commit-city.yml ← Runs that script on GitHub every 6 hours.
 ├── assets/         ← Put your images & files here (profile.jpg, resume.pdf).
 ├── README.md       ← Quick-reference: what to edit + how to deploy.
 ├── GUIDE.md        ← This file.
@@ -160,24 +161,25 @@ This means the 3D background needs an internet connection to appear.
     and the Skills / Tech Stack / typing-roles content was retuned to an
     NLP + CV + Deep Learning profile, with Vision Transformers and
     Mathematical Optimization added as dedicated skill cards.
-14. **Added the "Where I Ship Code" commit globe** (`js/globe.js`) — a dotted 3D
-    Earth with a glowing beam for every city you've committed code from (taller
-    beam = more commits) and arcs tracing your trips between them in order.
-    Drag to spin it, click a beam (or a commit in the list) to fly there; the side
-    panel shows totals, a "commits by local hour" chart, and your latest commits.
-    - **Why it needs a helper tool:** git never records *where* a commit was made.
-      So `tools/commit-globe/` installs a **git hook** — a tiny script git runs
-      automatically after every `git commit` — that notes the time, repo and
-      message, and looks up your city from your internet connection. That log
-      stays private on your computer (`~/.commit-globe/commits.tsv`).
-    - **Getting it onto the site** is a deliberate step: `publish` turns the log
-      into `data/commits.js`, hiding everything except city + time for commits
-      from private repos (it asks GitHub which repos are public). You then commit
-      and push like any other change.
-    - Until you publish real data, the globe shows sample data with a
-      "sample data" badge.
-    - Full instructions (setup, VPN tips, uninstall):
-      [`tools/commit-globe/README.md`](tools/commit-globe/README.md).
+14. **Replaced the commit globe with "Commit City"** (`js/city.js`). The globe
+    placed commits by location, and the always-on VPN made the locations wrong.
+    The city needs no location at all:
+    - **One tower = one repo. One floor = one of your commits** on the repo's main
+      branch. Repos above 60 commits get 60 floors plus a glowing spire; the
+      label always shows the true count.
+    - The newest repos stand on the right, where the camera starts. Drag, swipe,
+      use ◀ ▶, or the arrow keys to see older ones. Click a tower for details.
+    - **Private repos** show as purple towers labelled "🔒 private": the floors
+      are real, the name is hidden. The data file never contains their names.
+    - **The crane** stands on the repo you committed to most recently, lifting
+      the next floor into place.
+    - **Where the numbers come from:** a **GitHub Action** (a small job GitHub
+      runs for free on its own computers) runs `tools/commit-city/build.js`
+      every 6 hours. It asks the GitHub API how many commits you wrote in each
+      repo and writes `data/city.js`. It commits that file **only if a number
+      changed** — no new commits means no new commit from the bot.
+    - It needs a read-only token to see private repos. One-time setup:
+      [`tools/commit-city/README.md`](tools/commit-city/README.md).
 
 ## ✅ The site is LIVE at: <https://ishaan300104.github.io>
 
